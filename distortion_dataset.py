@@ -1,8 +1,13 @@
 import os
 import glob
 import cv2
+import numpy as np
 from PIL import Image
 import torch
+
+def _distort_radial(image, distortion_coefficient):
+
+    return image_distorted
 
 
 class DistortionDataset(torch.utils.data.Dataset):
@@ -28,7 +33,8 @@ class DistortionDataset(torch.utils.data.Dataset):
         image = cv2.imread(img_file_name)
 
         # apply random radial distortion
-        # [...]
+        distortion_coefficient = np.random.rand()
+        image = _distort_radial(image, distortion_coefficient)
 
         # convert to PIl image
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
