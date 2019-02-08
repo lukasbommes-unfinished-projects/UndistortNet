@@ -15,12 +15,12 @@ def _distort(image, k=400e-8, dx=0, dy=0):
     x = x.astype(np.float32) - width / 2 - dx
     y = y.astype(np.float32) - height / 2 - dy
     theta = np.arctan2(y, x)
-    d = (x * x + y * y) ** 0.5
-    r = d * (1 + k * d * d)
-    map_x = r * np.cos(theta) + width / 2 + dx
-    map_y = r * np.sin(theta) + height / 2 + dy
+    r = (x * x + y * y) ** 0.5
+    rd = r * (1 + k * r * r)
+    map_x = rd * np.cos(theta) + width / 2 + dx
+    map_y = rd * np.sin(theta) + height / 2 + dy
     image_distorted = cv2.remap(image, map_x, map_y, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
-    image_distorted = _crop_border(image_distorted)
+    #image_distorted = _crop_border(image_distorted)
     return image_distorted
 
 
@@ -38,7 +38,7 @@ def _crop_border(image):
 def _undistort(image, k=400e-8, dx=0, dy=0):
     """Undistort a given image based on the known distortion factor."""
     height, width, channel = image.shape
-    k = -k
+    #k = -k
     #k = random.uniform(-distort_limit, distort_limit) * 0.00001
     #dx = random.uniform(-shift_limit, shift_limit) * width
     #dy = random.uniform(-shift_limit, shift_limit) * height
@@ -46,41 +46,41 @@ def _undistort(image, k=400e-8, dx=0, dy=0):
     x = x.astype(np.float32) - width / 2 - dx
     y = y.astype(np.float32) - height / 2 - dy
     theta = np.arctan2(y, x)
-    d = (x * x + y * y) ** 0.5
-    r = d * (1 + k * d * d)
-    map_x = r * np.cos(theta) + width / 2 + dx
-    map_y = r * np.sin(theta) + height / 2 + dy
-    image_undistorted = cv2.remap(image, map_x, map_y, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_WRAP)
+    r = (x * x + y * y) ** 0.5
+    rd = r * (1 - k * r * r)
+    map_x = rd * np.cos(theta) + width / 2 + dx
+    map_y = rd * np.sin(theta) + height / 2 + dy
+    image_undistorted = cv2.remap(image, map_x, map_y, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
     return image_undistorted
 
-# def _undistort(image, k):
-#     """Undistort a given image based on the known distortion factor."""
-#     height, width, channel = image.shape
-#     K = np.eye(3)
-#     f = 10
-#     K[0, 0] = f
-#     K[1, 1] = f
-#     K[0, 2] = np.shape(image)[1]/2
-#     K[1, 2] = np.shape(image)[0]/2
-#     print(K)
-#     R = np.eye(3)
-#     P = np.eye(3)
-#     D = np.array([-3, 0., 0., 0.])
-#     K_new = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(K, D, (width, height), np.eye(3), balance=1.0, fov_scale=1.0)
-#     print(K_new)
-#     map_x, map_y = cv2.fisheye.initUndistortRectifyMap(K, D, R, K_new, (width, height), cv2.CV_16SC2)
-#     image_undistorted = cv2.remap(image, map_x, map_y, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
-#     return image_undistorted
+
+def _undistort_cv(image, k):
+    """Undistort a given image based on the known distortion factor."""
+    height, width, channel = image.shape
+    K = np.eye(3)
+    f = 200
+    K[0, 0] = f
+    K[1, 1] = f
+    K[0, 2] = np.shape(image)[1]/2
+    K[1, 2] = np.shape(image)[0]/2
+    print(K)
+    R = np.eye(3)
+    P = np.eye(3)
+    D = np.array([k*1e8*0.001, 0., 0., 0.])
+    K_new = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(K, D, (width, height), np.eye(3), balance=1.0, fov_scale=2.0)
+    print(K_new)
+    map_x, map_y = cv2.fisheye.initUndistortRectifyMap(K, D, R, K_new, (width, height), cv2.CV_16SC2)
+    image_undistorted = cv2.remap(image, map_x, map_y, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
+    return image_undistorted
 
 
-img_dir = "imagenet/val/ILSVRC2012_val_00001001.JPEG"
+img_dir = "imagenet/val/ILSVRC2012_val_00001086.JPEG"
 image = cv2.imread(img_dir)
 
-k = 400e-8
+k = 600e-8
 
 image_distorted = _distort(image, k)
-image_undistorted = _undistort(image_distorted, k)
-
+image_undistorted = _undistort_cv(image_distorted, k)
 
 while True:
     cv2.imshow("img_original", image)
