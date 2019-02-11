@@ -18,18 +18,20 @@ from torchvision import datasets, models, transforms
 
 from distortion_dataset import DistortionDataset
 
+np.random.seed(0)
+
 
 def visualize_data(dataloaders, num_images=3):
     images_shown = 0
-    for i, (x, y) in enumerate(dataloaders['val']):
+    for x, y in dataloaders['val']:
         # convert to opencv format
-        for image in x:
+        for image, distortion_coefficient in zip(x, y):
             image = image.permute(1, 2, 0).numpy()
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            print("image {}: distortion: {}".format(images_shown, distortion_coefficient))
 
-
-            cv2.imshow("image_{}".format(i), image)
-            cv2.waitKey(500)
+            cv2.imshow("image_{}".format(images_shown), image)
+            cv2.waitKey(5000)
 
             images_shown += 1
 
@@ -53,14 +55,10 @@ if __name__ == "__main__":
     data_dir = "hymenoptera_data"
     data_transforms = {
         "train": transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
             transforms.ToTensor(),
             #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ]),
         "val": transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
             transforms.ToTensor(),
             #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
