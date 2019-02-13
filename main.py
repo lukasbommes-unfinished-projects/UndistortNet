@@ -19,14 +19,17 @@ from torchvision import datasets, models, transforms
 
 from distortion_dataset import DistortionDataset
 
-np.random.seed(0)
 
+# TODO:
+# - save checkpoint files every K iterations
+# - visualize training via visdom plots
+
+np.random.seed(0)
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-# TODO: save checkpoint files every K iterations
 class UndistortNet(nn.Module):
     def __init__(self):
         super(UndistortNet, self).__init__()
