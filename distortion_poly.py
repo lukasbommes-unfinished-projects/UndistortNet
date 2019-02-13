@@ -9,64 +9,97 @@ import matplotlib.pyplot as plt
 #   (undistorted points can then be used to find the ground plane homography)
 
 
-def distort(image, k=-400e-8, dx=0, dy=0):
-    """Distort image with barrel distortion and distortion center (cx, cy).
-    For every (xd, yd) in the distorted image the coordinates (xu, yu)
-    in the original image are computed. For each (xd, yd) the remap function
-    interpolates the pixel value from the neigbouring pixels in the
-    original image. Thus, the following maps which yield (xu, yu) for a given
-    (xd, yd) are created:
-     -> xu = map_x(xd, yd)
-     -> yu = map_y(xd, yd)
-    The equations implemented to create the maps are based on a first order
-    division model for radial lens distortion. The radius in the undistorted
-    image ru can be computed from the radius rd in the distorted image as
-    follows: ru = rd / (1 + k * rd^2) where k is the distortion coefficient.
-    If k < 0, barrel distortion is created. For k > 0 pincushion distortion
-    occurs.
-    """
-    height, width, channel = image.shape
-    yd, xd = np.mgrid[0:height:1, 0:width:1]
-    xd = xd.astype(np.float32) - width / 2 - dx
-    yd = yd.astype(np.float32) - height / 2 - dy
-    theta = np.arctan2(yd, xd)
-    rd = np.sqrt(xd * xd + yd * yd)
-    ru = rd / (1 + k * rd * rd)
-    map_x = ru * np.cos(theta) + width / 2 + dx
-    map_y = ru * np.sin(theta) + height / 2 + dy
-    image_distorted = cv2.remap(image, map_x, map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)
-    return image_distorted
+def compute_distort_maps(image_width, image_height, k=-0.4, dx=0, dy=0):
+    """Compute distortion maps.
 
+    Compute map_x and map_y for barrel distortion with specified distortion
+    parameters. Maps can be used with cv2.remap.
 
-def undistort(image, k=-400e-8, dx=0, dy=0, scaling=True):
-    """Undistort a given image based on the known distortion factor and distortion center (cx, cy).
-    Similar as the distort function. However it uses a negative distortion coefficient to invert the
-    effect of the distortion function. The mapping function have the task to yield the coordinates
-    (xd, yd) in the distorted image for a given (xu, yu) in the new undistorted image. Thus:
-     -> xd = map_x(xu, yu)
-     -> yd = map_y(xu, yu)
-    Additionally, scaling is performed [...].
+    Args:
+        image_width (int): Image width in pixels of the image for which the
+            distort map is computed.
+
+        image_height (int): Image height in pixels.
+
+        k (float): The distortion coefficient. Has to be smaller or equal
+            to zero. Typical values lie in the range [-0.4 ... 0].
+
+        dx (float): Offset of the distortion center in x-direction.
+        dy (float): Offset of the distortion center in y-direction.
+
+    Returns:
+        map_x (numpy.ndarray): Map which yields the undistorted x coordinate as
+            a function of the distorted coordinates: xu = map_x(xd, yd).
+        map_y (numpy.ndarray): Map which yields the undistorted y coordinate as
+            a function of the distorted coordinates: yu = map_y(xd, yd).
+
+    To distort an image with the computed maps, use
+    `cv2.remap(image, map_x, map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)`
     """
-    k = -k
-    height, width, channel = image.shape
-    yu, xu = np.mgrid[0:height:1, 0:width:1]
-    xu = xu.astype(np.float32) - width / 2 - dx
-    yu = yu.astype(np.float32) - height / 2 - dy
-    theta = np.arctan2(yu, xu)
-    ru = np.sqrt(xu * xu + yu * yu)
-    rd = ru / (1 + k * ru * ru)
-    if scaling:
-        scaling_factor = np.max((
-            ru[0, 0] / rd[0, 0],
-            ru[0, -1] / rd[0, -1],
-            ru[-1, 0] / rd[-1, 0],
-            ru[-1, -1] / rd[-1, -1])) # find outermost corners
+    assert k <= 0, "Distortion parameter k has to be zero or negative."
+    w, h = image_width, image_height
+    yd, xd = np.mgrid[0:h, 0:w]
+    if k < 0:
+        # normalize coordinates to range [-0.5..0.5 x -0.5..0.5]
+        xdr = xd/w - dx/w - 1/2
+        ydr = yd/h - dy/h - 1/2
+        # convert to polar
+        rd = np.sqrt(xdr * xdr + ydr * ydr)
+        theta = np.arctan2(ydr, xdr)
+        # distort coordinates
+        ru = -1/(2*k*rd)-np.sqrt(1/(4*k*k*rd*rd)+1/k)
+        # convert back to cartesian
+        xur = ru * np.cos(theta)
+        yur = ru * np.sin(theta)
+        # un-normalize coordinates to oriaginal range [0..w x 0...h]
+        xu = (xur + 1/2)*w + dx
+        yu = (yur + 1/2)*h + dy
+        map_x = xu.astype(np.float32)
+        map_y = yu.astype(np.float32)
     else:
-        scaling_factor = 1.0
-    map_x = scaling_factor * rd * np.cos(theta) + width / 2 + dx
-    map_y = scaling_factor * rd * np.sin(theta) + height / 2 + dy
-    image_undistorted = cv2.remap(image, map_x, map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)
-    return image_undistorted
+        map_x = xd.astype(np.float32)
+        map_y = yd.astype(np.float32)
+    return map_x, map_y
+
+
+def compute_undistort_maps(image_width, image_height, k=-0.4, dx=0, dy=0):
+    """Compute undistortion maps.
+
+    Inverse of `compute_distort_maps`. Computes undistortion maps for specified
+    distortion parameters.
+
+    Arguments and return values are equivalent to `compute_distort_maps`. However,
+    the maps can be used to undistort an image intead of distorting it. Thus,
+    map_x yields xd = map_x(xu, yu) and map_y yields yd = map_y(xu, yu). Use the
+    computed maps with cv2.remap as explained for `compute_distort_maps`.
+
+    The computed maps have an inverse meaning of the maps computed with
+    `compute_distort_maps` when the same set of parameters (k, dx, dy) is used.
+    """
+    assert k <= 0, "Distortion parameter k has to be zero or negative."
+    w, h = image_width, image_height
+    yu, xu = np.mgrid[0:h, 0:w]
+    if k < 0:
+        # normalize coordinates to range [-0.5..0.5 x -0.5..0.5]
+        xur = (xu - dx)/w - 1/2
+        yur = (yu - dy)/h - 1/2
+        # convert to polar
+        ru = np.sqrt(xur * xur + yur * yur)
+        theta = np.arctan2(yur, xur)
+        # distort coordinates
+        rd = ru / (1 - k * ru * ru)
+        # convert back to cartesian
+        xdr = rd * np.cos(theta)
+        ydr = rd * np.sin(theta)
+        # un-normalize coordinates to oriaginal range [0..w x 0...h]
+        xd = (xdr + 1/2)*w + dx
+        yd = (ydr + 1/2)*h + dy
+        map_x = xd.astype(np.float32)
+        map_y = yd.astype(np.float32)
+    else:
+        map_x = xu.astype(np.float32)
+        map_y = yu.astype(np.float32)
+    return map_x, map_y
 
 
 def draw_central_rectangle(image, dw, dh, dx, dy, color=(255, 255, 255)):
@@ -93,84 +126,23 @@ def square_center_crop(image, size=None):
 
 if __name__ == "__main__":
 
-    k = -0.4
-    dx = 0
-    dy = 0
+    image = cv2.imread("old/dataset_experiments/img.jpg")
 
-    h = 31
-    w = 31
+    # crop out largest possible square
+    image = square_center_crop(image)
+    height, width, channel = image.shape
 
-    xu, yu = np.mgrid[0:h, 0:w]
+    # compute distortion and undistortion maps
+    d_map_x, d_map_y = compute_distort_maps(width, height, k=-0.4, dx=0, dy=0)
+    ud_map_x, ud_map_y = compute_undistort_maps(width, height, k=-0.4, dx=0, dy=0)
 
-    # normalize coordinates to range [-0.5..0.5 x -0.5..0.5]
-    xur = xu/w - dx/w - 1/2
-    yur = yu/h - dy/h - 1/2
+    # distort image
+    image_distorted = cv2.remap(image, d_map_x, d_map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)
 
-    # convert to polar
-    ru = np.sqrt(xur * xur + yur * yur)
-    theta = np.arctan2(yur, xur)
+    # undistort the distorted image
+    image_undistorted = cv2.remap(image_distorted, ud_map_x, ud_map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)
 
-    # distort coordinates
-    rd = ru / (1 - k * ru * ru)
 
-    # convert back to cartesian
-    xdr = rd * np.cos(theta)
-    ydr = rd * np.sin(theta)
-
-    # un-normalize coordinates to oriaginal range [0..w x 0...h]
-    xd = (xdr + dx + 1/2)*w
-    yd = (ydr + dy + 1/2)*h
-
-    f, ax = plt.subplots(1, 1, figsize=(7, 7))
-    ax.grid()
-    ax.scatter(xu, yu)
-    ax.scatter(xd, yd)
-    ax.legend(['undistorted','distorted'])
-    ax.set_title("distorting points")
-
-    ##############################################################
-
-    k = 0.4
-
-    #xd, yd = np.mgrid[0:h, 0:w]
-    #xd, yd =
-
-    # normalize coordinates to range [-0.5..0.5 x -0.5..0.5]
-    xdr = xd/w - dx/w - 1/2
-    ydr = yd/h - dy/h - 1/2
-
-    # convert to polar
-    rd = np.sqrt(xdr * xdr + ydr * ydr)
-    theta = np.arctan2(ydr, xdr)
-
-    # distort coordinates
-    ru = rd / (1 - k * rd * rd)
-
-    # convert back to cartesian
-    xur = ru * np.cos(theta)
-    yur = ru * np.sin(theta)
-
-    # un-normalize coordinates to oriaginal range [0..w x 0...h]
-    xu = (xur + dx + 1/2)*w
-    yu = (yur + dy + 1/2)*h
-
-    f, ax = plt.subplots(1, 1, figsize=(7, 7))
-    ax.grid()
-    ax.scatter(xd, yd)
-    ax.scatter(xu, yu)
-    ax.legend(['distorted','undistorted'])
-    ax.set_title("undistorting points")
-    plt.show()
-
-    # image = cv2.imread("old/dataset_experiments/img.jpg")
-    #
-    # # crop out squre
-    # image = square_center_crop(image)
-    #
-    # # distortion center
-    # dx=0
-    # dy=0
-    #
     # draw_central_rectangle(image, dw=130, dh=130, dx=dx, dy=dy, color=(0, 0, 255))
     # image_distorted = distort(image, k=-500e-8, dx=dx, dy=dy)
     #
@@ -189,13 +161,87 @@ if __name__ == "__main__":
     # image_distorted_cropped_resized = cv2.resize(image_distorted_cropped, (width, height), interpolation=cv2.INTER_LANCZOS4)
     #
     # image_undistorted = undistort(image_distorted_cropped_resized, k=-500e-8, dx=dx, dy=dy)
+
+    while True:
+        cv2.imshow("img_original", image)
+        cv2.imshow("img_distorted", image_distorted)
+        cv2.imshow("image_undistorted", image_undistorted)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cv2.destroyAllWindows()
+
     #
-    # while True:
-    #     cv2.imshow("img_original", image)
-    #     cv2.imshow("img_distorted", image_distorted)
-    #     cv2.imshow("image_distorted_cropped_resized", image_distorted_cropped_resized)
-    #     cv2.imshow("image_undistorted", image_undistorted)
-    #     if cv2.waitKey(1) & 0xFF == ord('q'):
-    #         break
+    # ##############################################################
+    # # distortion
     #
-    # cv2.destroyAllWindows()
+    # k = -0.4  # for normalized coordinates
+    # dx = 0
+    # dy = 0
+    #
+    # h = 30
+    # w = 50
+    #
+    # yu, xu = np.mgrid[0:h, 0:w]
+    #
+    # # normalize coordinates to range [-0.5..0.5 x -0.5..0.5]
+    # xur = (xu - dx)/w - 1/2
+    # yur = (yu - dy)/h - 1/2
+    #
+    # # convert to polar
+    # ru = np.sqrt(xur * xur + yur * yur)
+    # theta = np.arctan2(yur, xur)
+    #
+    # # distort coordinates
+    # rd = ru / (1 - k * ru * ru)
+    #
+    # #print("ru", ru[0,0], "rd", rd[0,0])
+    #
+    # # convert back to cartesian
+    # xdr = rd * np.cos(theta)
+    # ydr = rd * np.sin(theta)
+    #
+    # # un-normalize coordinates to oriaginal range [0..w x 0...h]
+    # xd = (xdr + 1/2)*w + dx
+    # yd = (ydr + 1/2)*h + dy
+    #
+    # f, ax = plt.subplots(1, 1, figsize=(7, 7))
+    # ax.grid()
+    # ax.scatter(xu, yu)
+    # ax.scatter(xd, yd)
+    # ax.legend(['undistorted', 'distorted'])
+    # ax.set_title("distorting points")
+    #
+    # ##############################################################
+    # # undistortion
+    #
+    # #xd, yd = np.mgrid[0:h, 0:w]
+    # #xd, yd =
+    #
+    # # normalize coordinates to range [-0.5..0.5 x -0.5..0.5]
+    # xdr = xd/w - dx/w - 1/2
+    # ydr = yd/h - dy/h - 1/2
+    #
+    # # convert to polar
+    # rd = np.sqrt(xdr * xdr + ydr * ydr)
+    # theta = np.arctan2(ydr, xdr)
+    #
+    # # distort coordinates
+    # ru = -1/(2*k*rd)-np.sqrt(1/(4*k*k*rd*rd)+1/k)
+    # #print("ru", ru[0,0], "rd", rd[0,0])
+    #
+    # # convert back to cartesian
+    # xur = ru * np.cos(theta)
+    # yur = ru * np.sin(theta)
+    #
+    # # un-normalize coordinates to oriaginal range [0..w x 0...h]
+    # xu = (xur + 1/2)*w + dx
+    # yu = (yur + 1/2)*h + dy
+    #
+    # f, ax = plt.subplots(1, 1, figsize=(7, 7))
+    # ax.grid()
+    # ax.scatter(xd, yd)
+    # ax.scatter(xu, yu)
+    # ax.legend(['distorted', 'undistorted'])
+    # ax.set_title("undistorting points")
+    #plt.show()
