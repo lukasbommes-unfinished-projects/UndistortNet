@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # tree # trees # ""
+003 # 0 # 0 # railway yard # railway yard # ""
+004 # 0 # 0 # wagons # wagons # ""
+005 # 0 # 0 # switch, electric switch, electrical switch # switch # ""
+006 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""
+007 # 0 # 1 # wagon # wagon # ""

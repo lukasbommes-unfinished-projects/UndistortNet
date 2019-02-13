@@ -1,0 +1,5 @@
+001 # 0 # 0 # mountain, mount # mountain # "rocky"
+002 # 0 # 0 # quicksand # quicksand # ""
+003 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""
+004 # 0 # 0 # flip flop # flip flop # ""
+005 # 0 # 0 # bag # bag # ""

@@ -1,0 +1,5 @@
+001 # 0 # 0 # water # water # ""
+002 # 0 # 0 # fish # fish # ""
+003 # 0 # 0 # fish # fish # ""
+004 # 0 # 0 # alga, algae # alga # ""
+005 # 0 # 0 # rock, stone # rock # ""

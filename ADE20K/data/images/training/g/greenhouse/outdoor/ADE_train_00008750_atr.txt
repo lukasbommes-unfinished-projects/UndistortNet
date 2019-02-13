@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # tree # trees # ""
+003 # 0 # 0 # greenhouse # greenhouse # ""
+004 # 0 # 0 # grass # grass # ""
+001 # 1 # 0 # door # door # ""
+005 # 0 # 0 # plant, flora, plant life # plants # ""
+006 # 0 # 0 # plant pots # plant pots # ""

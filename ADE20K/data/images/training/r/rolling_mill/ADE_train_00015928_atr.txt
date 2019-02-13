@@ -1,0 +1,6 @@
+001 # 0 # 0 # machine # machine # ""
+002 # 0 # 0 # roll # roll # ""
+003 # 0 # 0 # roll # roll # ""
+004 # 0 # 0 # roll # roll # ""
+005 # 0 # 0 # roll # roll # ""
+006 # 0 # 0 # rolling mill # rolling mill # ""

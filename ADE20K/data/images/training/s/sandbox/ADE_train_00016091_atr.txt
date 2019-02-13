@@ -1,0 +1,8 @@
+001 # 0 # 0 # plant, flora, plant life # plants # ""
+002 # 0 # 0 # sandpit # sandpit # ""
+003 # 0 # 0 # path # path # ""
+004 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""
+005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""
+006 # 0 # 0 # spade # spade # ""
+007 # 0 # 0 # spade # spade # ""
+008 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""

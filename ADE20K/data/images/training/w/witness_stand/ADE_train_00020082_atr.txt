@@ -1,0 +1,5 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # base, pedestal, stand # stand # ""
+003 # 0 # 1 # chair # chair # ""
+004 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # "sitting"
+005 # 0 # 0 # microphone, mike # microphone # ""

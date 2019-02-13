@@ -1,0 +1,8 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # straw # straw # ""
+004 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+005 # 0 # 1 # horse, equus caballus # horse # ""
+006 # 0 # 1 # horse, equus caballus # horse # ""
+007 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+008 # 0 # 0 # stethoscope # stethoscope # ""

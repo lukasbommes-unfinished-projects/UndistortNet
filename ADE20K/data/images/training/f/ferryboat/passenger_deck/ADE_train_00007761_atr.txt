@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # floor, flooring # floor # ""
+003 # 0 # 0 # sea # sea water # ""
+004 # 0 # 0 # mountain, mount # mountain # ""
+005 # 0 # 1 # boat # boat # ""
+006 # 0 # 0 # railing, rail # railing # ""
+007 # 0 # 1 # bench # bench # ""

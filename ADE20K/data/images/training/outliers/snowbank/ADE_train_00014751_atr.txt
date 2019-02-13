@@ -1,0 +1,6 @@
+001 # 0 # 0 # road, route # road # ""
+002 # 0 # 0 # snow # snow # ""
+003 # 0 # 1 # truck, motortruck # truck # ""
+001 # 1 # 0 # windshield # windshield # ""
+002 # 1 # 0 # window # window # ""
+003 # 1 # 0 # mirror # mirror # ""

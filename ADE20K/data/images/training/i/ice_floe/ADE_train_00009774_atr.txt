@@ -1,0 +1,5 @@
+001 # 0 # 0 # sea # sea water # ""
+002 # 0 # 0 # ice floe, floe # floe # ""
+003 # 0 # 0 # ice floe, floe # floe # ""
+004 # 0 # 0 # seal # seal # ""
+005 # 0 # 0 # ice floe, floe # floe # ""

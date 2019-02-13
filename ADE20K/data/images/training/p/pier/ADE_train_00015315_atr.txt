@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # sea # sea # ""
+003 # 0 # 0 # rock, stone # rock # ""
+004 # 0 # 0 # rock, stone # rocks # ""
+001 # 1 # 0 # waves # waves # ""
+005 # 0 # 0 # bridge, span # bridge # ""

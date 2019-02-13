@@ -1,0 +1,5 @@
+001 # 0 # 0 # mountain, mount # mountain # "rocky"
+002 # 0 # 0 # plant, flora, plant life # plants # ""
+003 # 0 # 0 # water # water # ""
+004 # 0 # 0 # plant, flora, plant life # plants # ""
+005 # 0 # 0 # waterfall, falls # waterfall # ""

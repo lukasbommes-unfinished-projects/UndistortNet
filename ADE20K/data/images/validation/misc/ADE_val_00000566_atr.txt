@@ -1,0 +1,7 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # box # box # ""
+003 # 0 # 0 # door # door # ""
+001 # 1 # 0 # button # button # ""
+002 # 1 # 0 # button # button # ""
+003 # 1 # 0 # button # button # ""
+004 # 1 # 0 # lock # lock # ""

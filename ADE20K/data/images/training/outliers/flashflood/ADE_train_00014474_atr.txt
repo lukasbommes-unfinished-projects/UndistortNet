@@ -1,0 +1,8 @@
+001 # 0 # 0 # building, edifice # building # ""
+002 # 0 # 0 # tree # trees # ""
+003 # 0 # 0 # tree # tree # "trunk"
+004 # 0 # 0 # river # river water # ""
+005 # 0 # 0 # tree # tree # ""
+006 # 0 # 0 # plant, flora, plant life # plants # ""
+007 # 0 # 1 # car, auto, automobile, machine, motorcar # car # ""
+008 # 0 # 0 # board, plank # plank # ""

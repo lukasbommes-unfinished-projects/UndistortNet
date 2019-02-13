@@ -1,0 +1,7 @@
+001 # 0 # 1 # house # house # ""
+002 # 0 # 1 # house # houses # ""
+003 # 0 # 0 # river # river water # ""
+004 # 0 # 0 # shrub, bush # bushes # ""
+005 # 0 # 0 # tree # trees # ""
+006 # 0 # 0 # land, ground, soil # land # ""
+007 # 0 # 0 # tree # tree # ""

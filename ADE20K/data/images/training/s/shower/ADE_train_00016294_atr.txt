@@ -1,0 +1,8 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # wall # wall # ""
+004 # 0 # 0 # wall # wall # ""
+005 # 0 # 0 # ceiling # ceiling # ""
+006 # 0 # 0 # step, stair # step # ""
+007 # 0 # 0 # shower # shower # ""
+008 # 0 # 0 # faucet, spigot # faucet # ""

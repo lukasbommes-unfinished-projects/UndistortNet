@@ -1,0 +1,7 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # chest of drawers, chest, bureau, dresser # dresser # ""
+004 # 0 # 0 # stretcher # stretcher # ""
+005 # 0 # 0 # cabinet # cabinet # ""
+006 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""
+007 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""

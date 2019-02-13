@@ -1,0 +1,8 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # floor, flooring # floor # ""
+004 # 0 # 0 # system # system # ""
+005 # 0 # 0 # buckets # buckets # ""
+006 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+007 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+008 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""

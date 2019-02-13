@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # floor, flooring # floor # ""
+004 # 0 # 0 # door # door # ""
+005 # 0 # 0 # meter # meter # ""
+006 # 0 # 1 # ashcan, trash can, garbage can, wastebin, ash bin, ash-bin, ashbin, dustbin, trash barrel, trash bin # trash can # ""

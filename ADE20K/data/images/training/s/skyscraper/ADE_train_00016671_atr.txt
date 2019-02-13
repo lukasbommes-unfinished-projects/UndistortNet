@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # signboard, sign # signs # ""
+003 # 0 # 0 # building, edifice # building # ""
+004 # 0 # 0 # building, edifice # building # ""
+005 # 0 # 0 # street lights # street lights # ""
+006 # 0 # 0 # pole # pole # ""
+007 # 0 # 0 # signboard, sign # sign # ""
+008 # 0 # 0 # signboard, sign # signs # ""

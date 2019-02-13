@@ -1,0 +1,5 @@
+001 # 0 # 0 # sky # sky # "cloudy"
+002 # 0 # 0 # field # field # ""
+003 # 0 # 0 # streetlight, street lamp # street light # ""
+004 # 0 # 0 # fence, fencing # fence # ""
+005 # 0 # 0 # shrub, bush # bushes # ""

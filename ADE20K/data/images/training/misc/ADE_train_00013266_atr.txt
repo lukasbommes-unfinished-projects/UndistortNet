@@ -1,0 +1,5 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # blade, vane # blade # ""
+004 # 0 # 0 # water # water # ""
+005 # 0 # 0 # mill # mill # ""

@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # tower # tower # ""
+003 # 0 # 0 # windowpane, window # window # ""
+004 # 0 # 0 # railing, rail # railing # ""
+005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "standing"
+006 # 0 # 0 # flag # flag # ""

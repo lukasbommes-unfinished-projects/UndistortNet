@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # building, edifice # building # ""
+003 # 0 # 0 # water # water # ""
+001 # 1 # 0 # column # column # ""
+002 # 1 # 0 # column # column # ""
+003 # 1 # 0 # window # window # ""
+004 # 1 # 0 # window # window # ""

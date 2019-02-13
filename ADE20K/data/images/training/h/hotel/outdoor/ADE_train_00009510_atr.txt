@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # windows # windows # ""
+002 # 1 # 0 # windows # windows # ""
+003 # 1 # 0 # windows # windows # ""
+004 # 1 # 0 # windows # windows # ""

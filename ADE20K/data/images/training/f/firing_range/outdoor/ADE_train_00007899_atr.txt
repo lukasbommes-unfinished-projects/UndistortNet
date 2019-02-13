@@ -1,0 +1,5 @@
+001 # 0 # 0 # tree # trees # ""
+002 # 0 # 0 # trunk, tree trunk, bole # trunks # ""
+003 # 0 # 0 # grass # grass # ""
+004 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+005 # 0 # 1 # gun # gun # ""

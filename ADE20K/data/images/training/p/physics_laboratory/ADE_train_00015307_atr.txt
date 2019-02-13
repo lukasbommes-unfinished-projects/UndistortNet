@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # desk # desk # ""
+003 # 0 # 0 # keyboard # keyboard # ""
+004 # 0 # 0 # screen, crt screen # screen # ""
+005 # 0 # 0 # equipment # equipment # ""
+006 # 0 # 0 # equipment # equipment # ""

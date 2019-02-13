@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # "cloudy"
+002 # 0 # 0 # earth, ground # ground # ""
+003 # 0 # 0 # hill # hills # ""
+004 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animals # ""
+005 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animals # ""
+006 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animal # ""
+007 # 0 # 0 # grass # grass # ""

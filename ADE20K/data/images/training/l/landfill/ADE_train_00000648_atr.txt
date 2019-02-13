@@ -1,0 +1,8 @@
+001 # 0 # 0 # rubbish, trash, scrap # trash # ""
+002 # 0 # 0 # fence, fencing # fence # ""
+003 # 0 # 0 # tree # trees # ""
+004 # 0 # 0 # bird # bird # ""
+005 # 0 # 0 # bird # bird # ""
+006 # 0 # 0 # bird # bird # ""
+007 # 0 # 0 # mattress # mattress # ""
+008 # 0 # 0 # chair # chair # ""

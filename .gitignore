@@ -2,6 +2,7 @@ __pycache__/
 *.jpeg
 *.JPEG
 *.jpg
+*.png
 *.tar
 
 old/fall11_urls.txt

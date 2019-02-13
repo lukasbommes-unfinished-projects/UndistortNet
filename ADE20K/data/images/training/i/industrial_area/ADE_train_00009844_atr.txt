@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # building, edifice # building # ""
+003 # 0 # 0 # tree # trees # ""
+001 # 1 # 0 # chimney # chimney # ""
+002 # 1 # 0 # chimney # chimney # ""
+003 # 1 # 0 # chimney # chimney # ""

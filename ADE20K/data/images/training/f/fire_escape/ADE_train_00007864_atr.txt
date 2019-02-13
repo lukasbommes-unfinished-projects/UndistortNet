@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # fire escape # fire escape # ""
+002 # 1 # 0 # grille # grille # ""
+003 # 1 # 0 # grille # grille # ""
+004 # 1 # 1 # door # door # ""
+005 # 1 # 1 # door # door # ""
+006 # 1 # 1 # door # door # ""

@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # nuclear reactor # nuclear reactor # ""
+003 # 0 # 0 # scaffolding, staging # scaffolding # ""
+004 # 0 # 1 # crane # crane # ""
+005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""
+006 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "walking"

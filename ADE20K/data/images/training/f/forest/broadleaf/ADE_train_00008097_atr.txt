@@ -1,0 +1,7 @@
+001 # 0 # 0 # river # river water # ""
+002 # 0 # 0 # rock, stone # rocks # ""
+003 # 0 # 0 # tree # tree # ""
+004 # 0 # 0 # tree # tree # "trunk"
+005 # 0 # 0 # tree # tree # "tunk"
+006 # 0 # 0 # tree # tree # "fallen,trunk"
+007 # 0 # 0 # tree # tree # "fallen,trunk"

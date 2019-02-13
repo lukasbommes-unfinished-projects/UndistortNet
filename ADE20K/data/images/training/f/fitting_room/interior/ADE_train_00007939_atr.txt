@@ -1,0 +1,5 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # mirror # mirror # ""
+003 # 0 # 0 # curtain, drape, drapery, mantle, pall # curtain # ""
+004 # 0 # 1 # chair # chair # ""
+005 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""

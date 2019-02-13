@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # raft # raft # ""
+003 # 0 # 0 # tree # trees # ""
+004 # 0 # 0 # rock, stone # rock # ""
+005 # 0 # 0 # river # river water # ""
+006 # 0 # 0 # raft # raft # ""
+007 # 0 # 0 # rock, stone # rock # ""

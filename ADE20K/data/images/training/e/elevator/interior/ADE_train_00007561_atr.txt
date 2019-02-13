@@ -1,0 +1,5 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # folding door # folding door # ""
+003 # 0 # 0 # control panel, instrument panel, control board, board, panel # button panel # "call buttons"
+004 # 0 # 0 # name plate # name plate # ""
+005 # 0 # 0 # plaque # plaque # ""

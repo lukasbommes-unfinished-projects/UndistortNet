@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # water # water # ""
+003 # 0 # 0 # earth, ground # ground # ""
+004 # 0 # 0 # refinery # refinery # ""
+005 # 0 # 0 # fence, fencing # fence # ""
+006 # 0 # 0 # chimney # chimney # ""
+007 # 0 # 0 # windowpane, window # window # ""

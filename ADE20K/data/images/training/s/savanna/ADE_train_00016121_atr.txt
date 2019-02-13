@@ -1,0 +1,5 @@
+001 # 0 # 0 # sky # sky # "cloudy"
+002 # 0 # 0 # earth, ground # ground # "savanna"
+003 # 0 # 0 # tree # tree # ""
+004 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animal # "elephant"
+005 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animal # "elephant"

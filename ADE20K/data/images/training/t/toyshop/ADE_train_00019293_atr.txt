@@ -1,0 +1,5 @@
+001 # 0 # 0 # drawing # drawing # ""
+002 # 0 # 1 # cabinet # cabinet # ""
+003 # 0 # 0 # plaything, toy # toy # "teddy"
+004 # 0 # 0 # plaything, toy # toy # "teddy"
+005 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""

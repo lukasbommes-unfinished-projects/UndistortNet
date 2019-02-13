@@ -1,0 +1,3 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # sidewalk, pavement # sidewalk # ""
+003 # 0 # 0 # building, edifice # building # ""

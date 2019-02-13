@@ -1,0 +1,5 @@
+001 # 0 # 0 # sky # sky # "cloudy"
+002 # 0 # 0 # mountain, mount # mountain # ""
+003 # 0 # 0 # water # water # ""
+004 # 0 # 0 # pier, wharf, wharfage, dock # dock # ""
+005 # 0 # 0 # seaplane, hydroplane # seaplane # ""

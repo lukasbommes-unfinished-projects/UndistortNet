@@ -1,0 +1,4 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # building, edifice # building # ""
+003 # 0 # 0 # elevator, lift # elevator # ""
+001 # 1 # 0 # window # window # ""

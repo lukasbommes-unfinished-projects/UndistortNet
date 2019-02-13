@@ -1,0 +1,4 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # hill # hill # ""
+003 # 0 # 0 # vineyard # vineyard # ""
+004 # 0 # 0 # vine shoot # vine shoot # ""

@@ -1,0 +1,2 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # earth, ground # ground # ""

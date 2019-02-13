@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # floor, flooring # floor # ""
+001 # 1 # 0 # door frame # door frame # ""
+004 # 0 # 0 # elevator door # elevator door # ""
+005 # 0 # 0 # push button, push, button # buttons # ""

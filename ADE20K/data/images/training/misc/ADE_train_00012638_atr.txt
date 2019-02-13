@@ -1,0 +1,6 @@
+001 # 0 # 0 # table # table # ""
+002 # 0 # 0 # book # book # ""
+001 # 1 # 0 # ribbon # ribbon # ""
+002 # 1 # 0 # page # page # ""
+003 # 0 # 0 # pen # pen # ""
+003 # 1 # 0 # ribbon # ribbon # ""

@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # "sunset/sunrise"
+002 # 0 # 0 # sea # sea water # ""
+001 # 1 # 0 # cloud # cloud # ""
+002 # 1 # 0 # cloud # cloud # ""
+003 # 1 # 0 # cloud # cloud # ""
+004 # 1 # 0 # cloud # cloud # ""
+005 # 1 # 0 # cloud # cloud # ""
+006 # 1 # 0 # cloud # cloud # ""

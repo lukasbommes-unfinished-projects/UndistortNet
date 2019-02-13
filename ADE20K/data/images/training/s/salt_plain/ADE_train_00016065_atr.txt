@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # bag, traveling bag, travelling bag, grip, suitcase # suitcase # ""
+003 # 0 # 0 # car, auto, automobile, machine, motorcar # car # ""
+004 # 0 # 0 # semidesert ground # semidesert ground # ""
+005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "sitting"
+001 # 1 # 0 # wheel # wheel # ""

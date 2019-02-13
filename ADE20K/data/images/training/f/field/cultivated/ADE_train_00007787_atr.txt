@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # plant, flora, plant life # plants # ""
+003 # 0 # 0 # tree # tree # ""
+001 # 1 # 0 # clouds # clouds # ""
+004 # 0 # 0 # tree # trees # ""
+005 # 0 # 0 # fence, fencing # fence # ""

@@ -1,0 +1,5 @@
+001 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # ticket window # ticket window # ""
+002 # 0 # 0 # signboard, sign # sign # ""
+003 # 0 # 0 # bulletin board, notice board # bulletin board # ""
+004 # 0 # 0 # bulletin board, notice board # bulletin board # ""

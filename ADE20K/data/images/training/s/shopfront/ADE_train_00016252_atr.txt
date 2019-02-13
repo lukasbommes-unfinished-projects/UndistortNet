@@ -1,0 +1,7 @@
+001 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # door # door # ""
+002 # 1 # 1 # door # door # ""
+002 # 0 # 0 # signboard, sign # sign # ""
+003 # 0 # 0 # awning, sunshade, sunblind # awning # ""
+003 # 1 # 0 # door # door # ""
+004 # 1 # 1 # window # window # ""

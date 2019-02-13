@@ -1,0 +1,5 @@
+001 # 0 # 0 # tree # trees # ""
+002 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # roof # roof # ""
+003 # 0 # 0 # solar energy # solar energy # ""
+002 # 1 # 0 # roof # roof # ""

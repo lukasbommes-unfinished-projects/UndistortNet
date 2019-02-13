@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # "sunset"
+002 # 0 # 0 # earth, ground # ground # ""
+003 # 0 # 0 # wind turbine # wind turbines # "background"
+004 # 0 # 0 # wind turbine # wind turbine # ""
+005 # 0 # 0 # wind turbine # wind turbine # ""
+006 # 0 # 1 # wind turbine # wind turbine # ""
+007 # 0 # 1 # wind turbine # wind turbine # "blade only"
+008 # 0 # 0 # wind turbine # wind turbine # ""

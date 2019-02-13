@@ -1,0 +1,5 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # oven # oven # ""
+003 # 0 # 0 # work surface # work surface # ""
+004 # 0 # 0 # cabinet # cabinet # ""
+005 # 0 # 0 # stove, kitchen stove, range, kitchen range, cooking stove # stove # ""

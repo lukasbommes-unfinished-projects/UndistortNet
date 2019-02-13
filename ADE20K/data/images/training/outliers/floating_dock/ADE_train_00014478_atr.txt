@@ -1,0 +1,7 @@
+001 # 0 # 0 # tree # trees # ""
+002 # 0 # 0 # water # water # ""
+003 # 0 # 0 # pier, wharf, wharfage, dock # dock # ""
+004 # 0 # 0 # truck, motortruck # truck # ""
+001 # 1 # 0 # window # window # ""
+002 # 1 # 0 # window # window # ""
+003 # 1 # 0 # windshield # windshield # ""

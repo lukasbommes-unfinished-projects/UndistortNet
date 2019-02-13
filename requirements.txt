@@ -15,9 +15,10 @@ redis==3.0.1
 scipy==1.2.0
 untangle==1.1.1
 easydict==1.9
-torch==1.0.1
+torch==1.0.1.post2
 torchvision==0.2.1
 tqdm==4.30.0
 beautifulsoup4==4.7.1
 requests==2.21.0
 urllib5==5.0.0
+visdom==0.1.8.8

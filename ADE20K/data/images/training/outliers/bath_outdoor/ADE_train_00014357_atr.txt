@@ -1,0 +1,6 @@
+001 # 0 # 0 # building, edifice # building # ""
+002 # 0 # 0 # water # water # ""
+001 # 1 # 0 # window # window # ""
+003 # 0 # 0 # stairs, steps # steps # ""
+002 # 1 # 1 # window # window # ""
+004 # 0 # 0 # arcade, colonnade # arcades # ""

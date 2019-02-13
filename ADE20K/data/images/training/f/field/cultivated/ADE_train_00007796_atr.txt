@@ -1,0 +1,5 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # field # field # ""
+003 # 0 # 0 # pole # pole # ""
+004 # 0 # 0 # hill # hills # ""
+005 # 0 # 0 # truck, motortruck # truck # ""

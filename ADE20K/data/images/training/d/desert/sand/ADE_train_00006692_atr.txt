@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # mountain, mount # mountain # ""
+003 # 0 # 0 # desert # desert # ""
+004 # 0 # 0 # car, auto, automobile, machine, motorcar # car # ""
+005 # 0 # 0 # car, auto, automobile, machine, motorcar # car # ""
+006 # 0 # 0 # dune # dune # ""

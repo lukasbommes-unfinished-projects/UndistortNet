@@ -1,0 +1,2 @@
+001 # 0 # 0 # road, route # road # ""
+002 # 0 # 0 # manhole # manhole # ""

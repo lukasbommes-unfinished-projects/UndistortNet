@@ -1,0 +1,5 @@
+001 # 0 # 0 # sidewalk, pavement # sidewalk # ""
+002 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # garage door # garage door # ""
+003 # 0 # 1 # fire engine # fire engine # ""
+004 # 0 # 0 # trade name, brand name, brand, marque # brand name # ""

@@ -1,0 +1,4 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # sea # sea water # ""
+003 # 0 # 0 # sun # sun # ""
+001 # 1 # 0 # clouds # clouds # ""

@@ -1,0 +1,6 @@
+001 # 0 # 0 # wheelhouse # wheelhouse # ""
+001 # 1 # 0 # window # window # ""
+002 # 1 # 0 # window # window # ""
+003 # 1 # 0 # window # window # ""
+004 # 1 # 0 # window # window # ""
+002 # 0 # 1 # rudder # rudder # ""

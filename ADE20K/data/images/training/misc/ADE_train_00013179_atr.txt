@@ -1,0 +1,5 @@
+001 # 0 # 1 # tree # tree # "trunk"
+002 # 0 # 1 # tree # tree # "trunk"
+003 # 0 # 0 # plant, flora, plant life # plant # "ferns"
+004 # 0 # 0 # plant, flora, plant life # plant # "fern"
+005 # 0 # 1 # tree # tree # "trunk"

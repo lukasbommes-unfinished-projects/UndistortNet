@@ -1,0 +1,5 @@
+001 # 0 # 0 # mine # mine # ""
+002 # 0 # 0 # truck, motortruck # truck # ""
+003 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "standing"
+004 # 0 # 0 # salt # salt # ""
+005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""

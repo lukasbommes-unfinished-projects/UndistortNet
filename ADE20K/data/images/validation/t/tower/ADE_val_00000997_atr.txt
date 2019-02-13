@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # "cloudy"
+002 # 0 # 0 # building, edifice # building # "tower"
+003 # 0 # 0 # tree # trees # ""
+004 # 0 # 0 # windowpane, window # window # ""
+005 # 0 # 0 # windowpane, window # window # ""
+006 # 0 # 0 # clock # clock # ""
+007 # 0 # 0 # clock # clock # ""

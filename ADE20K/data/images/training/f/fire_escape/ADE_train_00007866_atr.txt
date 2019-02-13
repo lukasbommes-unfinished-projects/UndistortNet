@@ -1,0 +1,8 @@
+001 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # window # window # ""
+002 # 0 # 0 # bannister, banister, balustrade, balusters, handrail # handrail # ""
+002 # 1 # 0 # fire escape # fire escape # ""
+003 # 1 # 0 # window # window # ""
+004 # 1 # 0 # window # window # ""
+003 # 0 # 0 # bannister, banister, balustrade, balusters, handrail # handrail # ""
+004 # 0 # 0 # bannister, banister, balustrade, balusters, handrail # handrail # ""

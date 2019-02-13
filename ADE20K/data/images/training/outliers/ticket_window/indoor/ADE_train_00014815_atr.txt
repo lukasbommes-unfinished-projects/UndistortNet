@@ -1,0 +1,5 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # ticket window # ticket window # ""
+003 # 0 # 0 # box # box # ""
+004 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+005 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""

@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # palisade # palisade # ""
+003 # 0 # 0 # fort # fort # ""
+004 # 0 # 0 # flag # flag # ""
+005 # 0 # 0 # earth, ground # ground # ""
+006 # 0 # 0 # cannon # cannon # ""

@@ -1,0 +1,7 @@
+001 # 0 # 0 # fireplace, hearth, open fireplace # fireplace # ""
+002 # 0 # 0 # firewood # firewood # ""
+003 # 0 # 0 # firewood # firewood # ""
+004 # 0 # 0 # flame # flame # ""
+005 # 0 # 0 # flame # flame # ""
+006 # 0 # 0 # flame # flame # ""
+007 # 0 # 0 # railing, rail # railing # ""

@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # field # field # ""
+003 # 0 # 0 # tree # trees # ""
+004 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animal # "cow"
+005 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animal # "cow"
+006 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animal # "cow"
+007 # 0 # 0 # animal, animate being, beast, brute, creature, fauna # animal # "cow"

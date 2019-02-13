@@ -1,0 +1,8 @@
+001 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "standing"
+002 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "standing"
+003 # 0 # 0 # waterfall, falls # waterfall # ""
+004 # 0 # 0 # river # river water # ""
+005 # 0 # 0 # rock, stone # rock # ""
+006 # 0 # 0 # land, ground, soil # land # ""
+007 # 0 # 0 # shrub, bush # bushes # ""
+008 # 0 # 0 # tree # trees # ""

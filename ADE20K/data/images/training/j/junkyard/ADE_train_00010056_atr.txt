@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # mirror # mirror # ""
+003 # 0 # 0 # rubbish, trash, scrap # trash # ""
+004 # 0 # 0 # earth, ground # ground # ""
+005 # 0 # 0 # bucket, pail # bucket # "plastic"
+006 # 0 # 0 # ladder # ladder # ""
+007 # 0 # 0 # basket, handbasket # basket # ""

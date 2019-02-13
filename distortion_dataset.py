@@ -10,6 +10,14 @@ from torchvision import transforms
 from distortion import distort, undistort
 
 
+def _convert_to_pil(image):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    return Image.fromarray(image)
+
+def _convert_to_opencv(image):
+    return cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+
+
 class DistortionDataset(torch.utils.data.Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
@@ -33,30 +41,39 @@ class DistortionDataset(torch.utils.data.Dataset):
             image = image.convert('RGB')
 
         # make image square and crop out center region
-        pre_transform = transforms.Compose([
-            transforms.Resize(512),  # 256
-            transforms.CenterCrop(448)  # 224
-        ])
-        image = pre_transform(image)
+        image = transforms.Resize(512)(image)
+        image = transforms.CenterCrop(512)(image)
 
-        # open as opencv image
-        #image = cv2.imread(img_file_name)
-
-        # convert to openCV image
-        image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        image = _convert_to_opencv(image)
 
         # apply random radial distortion
-        distortion_coefficient = np.random.randint(0, 101)  # uniform [0, 100]
-        image = distort(image, -4e-8*distortion_coefficient, dx=0, dy=0)
+        #distortion_coefficient = np.random.randint(0, 101)  # uniform [0, 100]
+        distortion_coefficient = 100
+        image_distorted = distort(image, -4e-8*distortion_coefficient, dx=0, dy=0)
+        distortion_coefficient = torch.tensor(distortion_coefficient, dtype=torch.int64)
 
-        # convert to PIL image
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(image)
+        # extract edges via canny edge detector
+        image_edges = cv2.Canny(image_distorted, 50, 200, None, 3)
 
-        # apply transforms
+        image_distorted = _convert_to_pil(image_distorted)
+        image_edges = _convert_to_pil(image_edges)
+
+        # crop out smaller central region to get rid of border
+        # at maximum distortion (k=-4e-6) this size ensures the border is not included
+        image_distorted = transforms.CenterCrop(370)(image_distorted)
+        image_edges = transforms.CenterCrop(370)(image_edges)
+
+        # apply other transforms
         if self.transform:
-            image = self.transform(image)
+            image_distorted = self.transform(image_distorted)
+            image_edges = self.transform(image_edges)
 
-        distortion_coefficient = torch.tensor(distortion_coefficient, dtype=torch.float)
+        # convert image to tensor
+        image_distorted = transforms.ToTensor()(image_distorted)
+        image_edges = transforms.ToTensor()(image_edges)
 
-        return image, distortion_coefficient
+        # normalize (needed for pretrained backbone)
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        image_distorted = normalize(image_distorted)
+
+        return image_distorted, image_edges, distortion_coefficient

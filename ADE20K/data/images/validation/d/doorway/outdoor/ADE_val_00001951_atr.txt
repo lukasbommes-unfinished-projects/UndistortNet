@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # floor, flooring # floor # ""
+003 # 0 # 0 # door # door # ""
+004 # 0 # 0 # entry phone # entry phone # ""
+001 # 1 # 0 # knob # knob # ""
+002 # 1 # 0 # pane # pane # "glass"

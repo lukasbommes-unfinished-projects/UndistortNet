@@ -1,0 +1,4 @@
+001 # 0 # 0 # road, route # road # ""
+002 # 0 # 0 # house # house # ""
+003 # 0 # 1 # car, auto, automobile, machine, motorcar # car # ""
+001 # 1 # 0 # garage door # garage door # ""

@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # seat # seat # ""
+003 # 0 # 0 # bag # bag # ""
+004 # 0 # 0 # controls # controls # ""
+005 # 0 # 0 # steering wheel, wheel # steering wheel # ""
+006 # 0 # 0 # steering wheel, wheel # steering wheel # ""
+007 # 0 # 0 # seat # seat # ""
+001 # 1 # 0 # armrest # armrest # ""

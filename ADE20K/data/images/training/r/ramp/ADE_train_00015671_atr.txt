@@ -1,0 +1,8 @@
+001 # 0 # 0 # fence, fencing # fence # ""
+002 # 0 # 1 # car, auto, automobile, machine, motorcar # car # ""
+003 # 0 # 0 # house # house # ""
+004 # 0 # 0 # ramp # ramp # ""
+005 # 0 # 0 # grass # grass # ""
+006 # 0 # 0 # bannister, banister, balustrade, balusters, handrail # handrail # ""
+001 # 1 # 0 # door # door # ""
+002 # 1 # 0 # window # window # ""

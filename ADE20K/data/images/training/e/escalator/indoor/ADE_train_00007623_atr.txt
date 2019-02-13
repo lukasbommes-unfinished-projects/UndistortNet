@@ -1,0 +1,5 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # wall # wall # ""
+004 # 0 # 0 # ceiling # ceiling # ""
+005 # 0 # 0 # escalator, moving staircase, moving stairway # escalator # ""

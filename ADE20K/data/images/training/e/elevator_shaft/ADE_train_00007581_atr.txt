@@ -1,0 +1,7 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # wall # wall # ""
+004 # 0 # 0 # wall # wall # ""
+005 # 0 # 0 # earth, ground # ground # ""
+006 # 0 # 0 # wire, conducting wire # wire # ""
+007 # 0 # 0 # counterweight # counterweight # ""

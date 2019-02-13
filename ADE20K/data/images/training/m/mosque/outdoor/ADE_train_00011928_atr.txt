@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+003 # 0 # 0 # mosque # mosque # ""
+004 # 0 # 0 # bird # bird # ""
+005 # 0 # 0 # bird # bird # ""
+006 # 0 # 0 # dome # dome # ""
+007 # 0 # 0 # minaret # minaret # ""
+008 # 0 # 0 # dome # dome # ""

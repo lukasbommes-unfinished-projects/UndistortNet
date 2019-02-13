@@ -1,0 +1,7 @@
+001 # 0 # 0 # sea # sea water # ""
+002 # 0 # 0 # mountain, mount # mountain # ""
+001 # 1 # 0 # wave # wave # ""
+002 # 1 # 0 # wave # wave # ""
+003 # 1 # 0 # wave # wave # ""
+003 # 0 # 0 # tree # tree # ""
+004 # 0 # 0 # tree # tree # ""

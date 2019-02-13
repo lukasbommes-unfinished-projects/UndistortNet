@@ -1,0 +1,6 @@
+001 # 0 # 0 # arch, archway # arch # ""
+002 # 0 # 0 # building, edifice # building # ""
+003 # 0 # 0 # water # water # ""
+004 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+001 # 1 # 0 # window # window # ""
+005 # 0 # 0 # sculpture # sculpture # ""

@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # stairs, steps # steps # ""
+004 # 0 # 0 # railing, rail # railing # ""
+005 # 0 # 0 # pulpit # pulpit # ""
+006 # 0 # 0 # windowpane, window # window # "casement"
+001 # 1 # 1 # sash # sash # ""
+002 # 1 # 1 # sash # sash # ""

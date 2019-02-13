@@ -1,0 +1,8 @@
+001 # 0 # 1 # sky # sky # "overcast"
+002 # 0 # 0 # floor, flooring # floor # ""
+003 # 0 # 0 # metal structure # metal structure # ""
+004 # 0 # 1 # building, edifice # building # "industrial"
+005 # 0 # 1 # electrical substation # electrical substation # ""
+006 # 0 # 1 # metal structure # metal structure # ""
+007 # 0 # 0 # fence, fencing # fence # "wire"
+008 # 0 # 0 # pipe, pipage, piping # pipes # ""

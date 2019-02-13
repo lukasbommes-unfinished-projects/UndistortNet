@@ -1,0 +1,6 @@
+001 # 0 # 0 # water # water # ""
+002 # 0 # 0 # stairs, steps # steps # ""
+003 # 0 # 0 # stairs, steps # steps # ""
+004 # 0 # 0 # boat # boat # ""
+005 # 0 # 0 # grass # grass # ""
+006 # 0 # 0 # pier, wharf, wharfage, dock # dock # ""

@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # sea # sea water # ""
+003 # 0 # 0 # sea # sea water # ""
+004 # 0 # 0 # aircraft carrier, carrier, flattop, attack aircraft carrier # aircraft carrier # ""
+005 # 0 # 0 # airplane, aeroplane, plane # airplane # ""
+006 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "standing"

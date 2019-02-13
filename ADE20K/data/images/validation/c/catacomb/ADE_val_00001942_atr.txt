@@ -1,0 +1,5 @@
+001 # 0 # 0 # wall # wall # "stone"
+002 # 0 # 0 # floor, flooring # floor # ""
+003 # 0 # 0 # ceiling # ceiling # "stone"
+004 # 0 # 0 # niche # niche # ""
+005 # 0 # 0 # niche # niche # ""

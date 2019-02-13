@@ -1,0 +1,6 @@
+001 # 0 # 0 # waterfall, falls # waterfall # ""
+002 # 0 # 0 # lake # lake # ""
+003 # 0 # 0 # shrub, bush # bushes # ""
+004 # 0 # 0 # cliff, drop, drop-off # cliffs # ""
+005 # 0 # 0 # cliff, drop, drop-off # cliffs # ""
+006 # 0 # 0 # shrub, bush # bushes # ""

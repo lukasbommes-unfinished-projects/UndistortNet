@@ -1,0 +1,7 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # ceiling # ceiling # ""
+004 # 0 # 0 # telescope # telescope # ""
+005 # 0 # 0 # table # table # ""
+006 # 0 # 1 # door # door # ""
+007 # 0 # 1 # door # door # ""

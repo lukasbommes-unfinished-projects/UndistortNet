@@ -1,0 +1,5 @@
+001 # 0 # 0 # sea # sea water # ""
+002 # 0 # 0 # helicopter # helicopter # ""
+003 # 0 # 1 # helicopter # helicopter # ""
+004 # 0 # 1 # aircraft carrier, carrier, flattop, attack aircraft carrier # aircraft carrier # ""
+005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""

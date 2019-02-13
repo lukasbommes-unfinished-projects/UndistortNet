@@ -1,0 +1,5 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # ruins # ruins # ""
+003 # 0 # 0 # column, pillar # column # ""
+004 # 0 # 0 # stairs, steps # steps # ""
+005 # 0 # 0 # grass # grass # ""

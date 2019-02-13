@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # mountain, mount # mountain # ""
+003 # 0 # 0 # desert # desert # ""
+004 # 0 # 0 # shrub, bush # shrub # ""
+005 # 0 # 0 # shrub, bush # shrub # ""
+006 # 0 # 0 # shrub, bush # shrubs # ""
+007 # 0 # 0 # shrub, bush # shrub # ""

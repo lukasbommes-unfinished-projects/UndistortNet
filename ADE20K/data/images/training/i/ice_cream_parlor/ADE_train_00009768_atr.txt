@@ -1,0 +1,7 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # ceiling # ceiling # ""
+004 # 0 # 0 # case, display case, showcase, vitrine # showcase # ""
+005 # 0 # 0 # lamp # pendant lamp # "off"
+006 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+007 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""

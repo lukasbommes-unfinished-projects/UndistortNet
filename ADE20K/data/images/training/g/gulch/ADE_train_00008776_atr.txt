@@ -1,0 +1,7 @@
+001 # 0 # 0 # footbridge, overcrossing, pedestrian bridge # footbridge # ""
+002 # 0 # 0 # mountain, mount # mountain # ""
+003 # 0 # 0 # mountain, mount # mountain # ""
+004 # 0 # 0 # water # water # ""
+005 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+006 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""
+007 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""

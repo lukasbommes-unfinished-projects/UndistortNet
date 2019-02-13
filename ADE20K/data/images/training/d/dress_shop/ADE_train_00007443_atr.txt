@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # floor, flooring # floor # ""
+003 # 0 # 0 # rack # clothes rack # ""
+004 # 0 # 0 # apparel, wearing apparel, dress, clothes # dresses # ""
+005 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+006 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""

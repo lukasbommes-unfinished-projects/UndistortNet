@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 0 # shelf # shelves # ""
+004 # 0 # 0 # shelf # shelves # ""
+005 # 0 # 0 # counter # counter # ""
+006 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""

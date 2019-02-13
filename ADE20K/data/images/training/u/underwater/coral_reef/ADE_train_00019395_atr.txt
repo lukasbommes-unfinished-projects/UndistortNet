@@ -1,0 +1,6 @@
+001 # 0 # 0 # water # water # ""
+002 # 0 # 0 # rock, stone # rocks # ""
+003 # 0 # 0 # rock, stone # rocks # ""
+004 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # "diver"
+005 # 0 # 0 # plant, flora, plant life # plant # ""
+006 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # "diver"

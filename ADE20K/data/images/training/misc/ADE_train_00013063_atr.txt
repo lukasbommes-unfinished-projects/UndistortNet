@@ -1,0 +1,4 @@
+001 # 0 # 0 # floor, flooring # floor # ""
+002 # 0 # 0 # manhole # manhole # ""
+003 # 0 # 0 # grass # grass # ""
+004 # 0 # 0 # grass # grass # ""

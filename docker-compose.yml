@@ -1,9 +1,10 @@
 version: "2.3"
 services:
 
-  sfmt_dev:
-    container_name: sfmt_dev
+  undistort_net:
+    container_name: undistort_net
     build: .
+    image: undistort_net_image
     working_dir: /development
     runtime: nvidia
     environment:
@@ -13,3 +14,13 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw  # for GUI access
       - .:/development
     #command: python -u dev.py
+
+  undistort_net_visdom:
+    container_name: undistort_net_visdom
+    image: undistort_net_image
+    working_dir: /development
+    ports:
+      - "8097:8097"
+    volumes:
+      - .:/development
+    command: visdom

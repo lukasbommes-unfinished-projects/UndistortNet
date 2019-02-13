@@ -1,0 +1,4 @@
+001 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # shop window # shop window # ""
+002 # 1 # 0 # door # door # ""
+002 # 0 # 0 # trade name, brand name, brand, marque # brand name # ""

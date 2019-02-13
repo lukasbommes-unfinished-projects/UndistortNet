@@ -1,0 +1,7 @@
+001 # 0 # 0 # tree # tree # ""
+002 # 0 # 0 # grass # grass # ""
+003 # 0 # 1 # tree # tree # ""
+004 # 0 # 1 # tree # tree # ""
+005 # 0 # 1 # tree # tree # ""
+006 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+007 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""

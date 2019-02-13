@@ -1,0 +1,5 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # ticket window # ticket window # ""
+003 # 0 # 0 # chair # chair # ""
+004 # 0 # 0 # bulletin board, notice board # bulletin board # ""
+005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "sitting"

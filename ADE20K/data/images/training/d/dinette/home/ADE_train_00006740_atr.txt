@@ -1,0 +1,5 @@
+001 # 0 # 0 # floor, flooring # floor # ""
+002 # 0 # 1 # cabinet # cabinet # ""
+003 # 0 # 1 # bench # bench # ""
+004 # 0 # 0 # table # table # ""
+005 # 0 # 0 # bench # bench # ""

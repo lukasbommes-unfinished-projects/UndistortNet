@@ -1,0 +1,3 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # cliff, drop, drop-off # cliff # ""
+003 # 0 # 0 # waterfall, falls # waterfall # ""

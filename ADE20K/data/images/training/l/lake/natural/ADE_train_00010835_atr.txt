@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # building, edifice # buildings # ""
+003 # 0 # 0 # shrub, bush # bushes # ""
+004 # 0 # 0 # pond # pond # ""
+005 # 0 # 0 # plant, flora, plant life # plants # ""
+006 # 0 # 0 # plant, flora, plant life # plant # ""
+007 # 0 # 0 # plant, flora, plant life # plants # ""
+008 # 0 # 0 # plant, flora, plant life # plants # ""

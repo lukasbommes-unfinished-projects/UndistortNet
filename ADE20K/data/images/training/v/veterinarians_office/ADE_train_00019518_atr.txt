@@ -1,0 +1,6 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 1 # refrigerator, icebox # refrigerator # ""
+003 # 0 # 1 # table # table # ""
+004 # 0 # 0 # dog, domestic dog, canis familiaris # dog # ""
+005 # 0 # 0 # notebook # notebook # ""
+006 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""

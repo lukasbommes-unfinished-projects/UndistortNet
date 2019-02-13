@@ -1,0 +1,8 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # building, edifice # building # ""
+001 # 1 # 0 # wall # wall # ""
+002 # 1 # 0 # window # window # ""
+003 # 1 # 0 # fire escape # fire escape # ""
+004 # 1 # 0 # window # window # ""
+005 # 1 # 0 # wall # wall # ""
+003 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # ""

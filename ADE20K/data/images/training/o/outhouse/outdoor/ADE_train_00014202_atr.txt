@@ -1,0 +1,7 @@
+001 # 0 # 1 # grass # grass # ""
+002 # 0 # 1 # outhouse # outhouse # ""
+003 # 0 # 1 # tree # trees # ""
+004 # 0 # 0 # ornament # ornament # "moon"
+005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "man,sitting"
+006 # 0 # 1 # flag # flag # "usa"
+007 # 0 # 1 # flag # flag # "usa"

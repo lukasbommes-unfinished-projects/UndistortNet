@@ -1,0 +1,5 @@
+001 # 0 # 0 # tunnel # tunnel # ""
+002 # 0 # 0 # walkway # walkway # ""
+003 # 0 # 0 # walkway # walkway # ""
+004 # 0 # 0 # river # river water # ""
+005 # 0 # 0 # fence, fencing # fence # ""

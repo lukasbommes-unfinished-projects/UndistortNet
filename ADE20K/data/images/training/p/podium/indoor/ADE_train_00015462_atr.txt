@@ -1,0 +1,7 @@
+001 # 0 # 0 # wall # wall # "glass"
+002 # 0 # 0 # base, pedestal, stand # stand # ""
+003 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+004 # 0 # 0 # screen, crt screen # screen # ""
+005 # 0 # 0 # plant, flora, plant life # plant # ""
+006 # 0 # 0 # plant, flora, plant life # plant # ""
+007 # 0 # 0 # microphone, mike # microphone # ""

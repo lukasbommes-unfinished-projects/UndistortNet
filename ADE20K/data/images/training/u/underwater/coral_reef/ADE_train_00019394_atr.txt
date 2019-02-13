@@ -1,0 +1,5 @@
+001 # 0 # 0 # water # water # ""
+002 # 0 # 0 # rock, stone # rocks # ""
+003 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "diver"
+004 # 0 # 0 # photo machine # photo machine # ""
+005 # 0 # 0 # coral # coral # ""

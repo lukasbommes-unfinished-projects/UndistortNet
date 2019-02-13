@@ -1,0 +1,8 @@
+001 # 0 # 0 # wall # wall # ""
+002 # 0 # 0 # wall # wall # ""
+003 # 0 # 1 # bed # bed # "double size"
+004 # 0 # 1 # bed # bed # "bunk"
+005 # 0 # 0 # painting, picture # picture # "photo"
+006 # 0 # 1 # painting, picture # picture # "photo"
+007 # 0 # 1 # painting, picture # picture # "photo"
+008 # 0 # 0 # pillow # pillow # ""

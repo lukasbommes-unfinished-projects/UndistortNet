@@ -1,0 +1,6 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # sand dunes # sand dunes # ""
+003 # 0 # 0 # sand dune # sand dune # ""
+004 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "walking"
+005 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "walking"
+006 # 0 # 0 # person, individual, someone, somebody, mortal, soul # person # "walking"

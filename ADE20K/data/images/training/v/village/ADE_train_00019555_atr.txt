@@ -1,0 +1,7 @@
+001 # 0 # 0 # sky # sky # ""
+002 # 0 # 0 # house # houses # ""
+003 # 0 # 0 # building, edifice # buildings # ""
+004 # 0 # 0 # field # field # ""
+005 # 0 # 0 # path # path # ""
+006 # 0 # 0 # field # field # ""
+007 # 0 # 0 # mountain, mount # mountain # ""

@@ -1,0 +1,8 @@
+001 # 0 # 0 # plant, flora, plant life # plant # ""
+002 # 0 # 0 # tent, collapsible shelter # tent # ""
+003 # 0 # 0 # grass # grass # ""
+004 # 0 # 0 # grass # grass # ""
+005 # 0 # 0 # mug # mug # ""
+006 # 0 # 0 # shoe # shoe # ""
+007 # 0 # 0 # shoe # shoe # ""
+008 # 0 # 0 # path # path # ""

@@ -1,0 +1,7 @@
+001 # 0 # 0 # earth, ground # ground # ""
+002 # 0 # 0 # trench # trench # ""
+003 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+004 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+005 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # ""
+006 # 0 # 1 # person, individual, someone, somebody, mortal, soul # person # "sitting"
+007 # 0 # 1 # tools box # tools box # ""

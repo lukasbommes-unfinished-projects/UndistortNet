@@ -1,0 +1,5 @@
+001 # 0 # 0 # road, route # road # ""
+002 # 0 # 0 # sidewalk, pavement # sidewalk # ""
+003 # 0 # 0 # grass # grass # ""
+004 # 0 # 0 # grass # grass # ""
+005 # 0 # 0 # manhole # manhole # ""

@@ -1,0 +1,5 @@
+001 # 0 # 0 # sulfur mine # sulfur mine # ""
+002 # 0 # 0 # water # water # ""
+003 # 0 # 0 # rock, stone # stone # ""
+004 # 0 # 0 # rock, stone # stones # ""
+005 # 0 # 0 # rock, stone # stones # ""
