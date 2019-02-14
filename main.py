@@ -64,17 +64,23 @@ class UndistortNet(nn.Module):
         return x
 
 
-def visualize_data(dataloaders, num_images=3):
+def visualize_data(dataloaders, num_images=3, phase='train'):
     images_shown = 0
-    for x, x_edges, y in dataloaders['val']:
-        for x, distortion_coefficient in zip(x, y):
-            print(x.shape)
-            print(y.shape)
-            print("image {}: distortion: {}".format(images_shown, -4e-8*distortion_coefficient.numpy()))
+    for images, parameters in tqdm(dataloaders[phase], desc=phase):
+        (b_image_distorted, b_image_distorted, b_image_undistorted) = images
+        (b_k, b_dx, b_dy) = parameters
+        for image_distorted, image_distorted, image_undistorted, k, dx, dy in zip(
+        b_image_distorted, b_image_distorted, b_image_undistorted, b_k, b_dx, b_dy):
 
-            x = x.permute(1, 2, 0).numpy()
-            x = cv2.cvtColor(x, cv2.COLOR_RGB2BGR)
-            cv2.imshow("image_{}".format(images_shown), x)
+            k = k.numpy()
+            dx = dx.numpy()
+            dy = dy.numpy()
+            k = -4e-3*k
+            print("image {}: k = {}, dx = {}, dy = {}".format(images_shown, k, dx, dy))
+
+            image_distorted = image_distorted.permute(1, 2, 0).numpy()
+            image_distorted = cv2.cvtColor(image_distorted, cv2.COLOR_RGB2BGR)
+            cv2.imshow("image_{}".format(images_shown), image_distorted)
             cv2.waitKey(5000)
 
             images_shown += 1
@@ -86,7 +92,7 @@ def visualize_data(dataloaders, num_images=3):
 if __name__ == "__main__":
     device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
-    torch.cuda.empty_cache()
+    torch.cuda.empty_cache()  # needed?
 
     # network setup
     model = UndistortNet()
@@ -135,10 +141,15 @@ if __name__ == "__main__":
                 running_loss = 0.0
 
                 # iterate over data
-                for x, x_edges, y in tqdm(dataloaders[phase], desc=phase):
-                    x = x.to(device)  # [32, 3, 224, 224]
-                    x_edges = x_edges.to(device)
-                    y = y.to(device)  # [32]
+                for images, parameters in tqdm(dataloaders[phase], desc=phase):
+                    image_distorted, image_distorted_cropped, image_undistorted = images
+                    k, dx, dy = parameters
+
+                    # move to GPU
+                    image_distorted_cropped = image_distorted_cropped.to(device)  # [B, 3, 224, 224]
+                    k = k.to(device)  # [B]
+                    dx = dx.to(device)
+                    dy = dy.to(device)
 
                     optimizer.zero_grad()
 

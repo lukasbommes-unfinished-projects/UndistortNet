@@ -208,7 +208,7 @@ def crop_max(image, width, height, maps, dx, dy):
         yd_max = ud_map_y[height-1, 0]
     elif dx < 0 and dy < 0:
         xd_min = ud_map_x[height-1, 0]
-        xd_max = ud_ud_map_x[height-1, width-1]
+        xd_max = ud_map_x[height-1, width-1]
         yd_min = ud_map_y[0, width-1]
         yd_max = ud_map_y[height-1, width-1]
     elif dx >= 0 and dy < 0:
