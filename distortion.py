@@ -1,12 +1,5 @@
-import random
 import cv2
 import numpy as np
-
-#import matplotlib.pyplot as plt
-
-# TODO:
-# - write function to map points from distorted to undistorted image
-#   (undistorted points can then be used to find the ground plane homography)
 
 
 def compute_maps(image_width, image_height, k=-0.4, dx=0, dy=0):
@@ -76,9 +69,11 @@ def compute_maps(image_width, image_height, k=-0.4, dx=0, dy=0):
         rd = np.sqrt(xdr * xdr + ydr * ydr)
         theta = np.arctan2(ydr, xdr)
         # distort coordinates
-        d = 1/(4*k*k*rd*rd)+1/k
-        d[d<0] = 0
-        ru = -1/(2*k*rd)-np.sqrt(d)
+        d1 = 4*k*k*rd*rd
+        eps = np.finfo(float).eps  # prevents divide by zero for small d1
+        d2 = 1/(d1 + eps) + 1/k
+        d2[d2<0] = 0 # prevent negative value in root
+        ru = -1/(2*k*rd + eps)-np.sqrt(d2)
         # convert back to cartesian
         xur = ru * np.cos(theta)
         yur = ru * np.sin(theta)
@@ -327,101 +322,3 @@ if __name__ == "__main__":
             break
 
     cv2.destroyAllWindows()
-
-
-    # ##############################################################
-    # # distortion
-    #
-    # k = -0.4  # for normalized coordinates
-    # dx = 10
-    # dy = -10
-    #
-    # h = 31
-    # w = 51
-    #
-    # yu, xu = np.mgrid[0:h, 0:w]
-    #
-    # # yu:             xu:
-    # # 0 1 2 .. h-1    0   0   0   .. 0
-    # # 0 1 2 .. h-1    1   1   1   .. 1
-    # # . . .     .     .   .   .      .
-    # # 0 1 2 .. h-1    w-1 w-1 w-1 .. w-1
-    # #
-    # #
-    #
-    # # normalize coordinates to range [-0.5..0.5 x -0.5..0.5]
-    # xur = (xu - dx)/w - 1/2
-    # yur = (yu - dy)/h - 1/2
-    #
-    # # convert to polar
-    # ru = np.sqrt(xur * xur + yur * yur)
-    # theta = np.arctan2(yur, xur)
-    #
-    # # distort coordinates
-    # rd = ru / (1 - k * ru * ru)
-    #
-    # def border_correct(ru, rd):
-    #     s = np.max((ru[0, 0] / rd[0, 0],
-    #                 ru[0, -1] / rd[0, -1],
-    #                 ru[-1, 0] / rd[-1, 0],
-    #                 ru[-1, -1] / rd[-1, -1]))
-    #     print(s)
-    #     return s
-    #
-    # # rescale (crop or fit)
-    # s = border_correct(ru, rd)
-    # rd = rd * s
-    #
-    # # convert back to cartesian
-    # xdr = rd * np.cos(theta)
-    # ydr = rd * np.sin(theta)
-    #
-    # # un-normalize coordinates to oriaginal range [0..w x 0...h]
-    # xd = (xdr + 1/2)*w + dx
-    # yd = (ydr + 1/2)*h + dy
-    #
-    # f, ax = plt.subplots(1, 1)
-    # ax.grid()
-    # ax.scatter(xdr, ydr)
-    # ax.scatter(xur, yur)
-    # ax.legend(['distorted', 'undistorted'])
-    # ax.set_title("distorting points")
-    #
-    # ##############################################################
-    # # undistortion
-    #
-    # #k = -0.4  # for normalized coordinates
-    # #dx = 5
-    # #dy = -5
-    #
-    # #h = 30
-    # #w = 50
-    #
-    # yd, xd = np.mgrid[0:h, 0:w]
-    #
-    # # normalize coordinates to range [-0.5..0.5 x -0.5..0.5]
-    # xdr = (xd - dx)/w - 1/2
-    # ydr = (yd - dy)/h - 1/2
-    #
-    # # convert to polar
-    # rd = np.sqrt(xdr * xdr + ydr * ydr)
-    # theta = np.arctan2(ydr, xdr)
-    #
-    # # distort coordinates
-    # ru = -1/(2*k*rd)-np.sqrt(1/(4*k*k*rd*rd)+1/k)
-    #
-    # # convert back to cartesian
-    # xur = ru * np.cos(theta)
-    # yur = ru * np.sin(theta)
-    #
-    # # un-normalize coordinates to oriaginal range [0..w x 0...h]
-    # xu = (xur + 1/2)*w + dx
-    # yu = (yur + 1/2)*h + dy
-    #
-    # f, ax = plt.subplots(1, 1)
-    # ax.grid()
-    # ax.scatter(xdr, ydr)
-    # ax.scatter(xur, yur)
-    # ax.legend(['distorted', 'undistorted'])
-    # ax.set_title("undistorting points")
-    # plt.show()

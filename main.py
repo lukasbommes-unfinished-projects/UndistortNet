@@ -67,18 +67,14 @@ class UndistortNet(nn.Module):
 def visualize_data(dataloaders, num_images=3):
     images_shown = 0
     for x, x_edges, y in dataloaders['val']:
-        for x, x_edges, distortion_coefficient in zip(x, x_edges, y):
+        for x, distortion_coefficient in zip(x, y):
             print(x.shape)
-            print(x_edges.shape)
             print(y.shape)
             print("image {}: distortion: {}".format(images_shown, -4e-8*distortion_coefficient.numpy()))
 
             x = x.permute(1, 2, 0).numpy()
             x = cv2.cvtColor(x, cv2.COLOR_RGB2BGR)
-            x_edges = x_edges.permute(1, 2, 0).numpy()
-            x_edges = cv2.cvtColor(x_edges, cv2.COLOR_RGB2BGR)
             cv2.imshow("image_{}".format(images_shown), x)
-            cv2.imshow("edges_{}".format(images_shown), x_edges)
             cv2.waitKey(5000)
 
             images_shown += 1
