@@ -7,20 +7,26 @@ import matplotlib.pyplot as plt
 # TODO:
 # - write function to map points from distorted to undistorted image
 #   (undistorted points can then be used to find the ground plane homography)
+# - crop distorted image so no background is visible
+# - scale undistorted image so it fits into the viewport
+# (see lensdistort.m in downloads)
 
 
 def compute_distort_maps(image_width, image_height, k=-0.4, dx=0, dy=0):
     """Compute distortion maps.
 
     Compute map_x and map_y for barrel distortion with specified distortion
-    parameters. Maps can be used with apply_maps function to distort an image.
+    parameters. Maps can be used with cv2.remap.
 
     Args:
         image_width (int): Image width in pixels of the image for which the
             distort map is computed.
+
         image_height (int): Image height in pixels.
+
         k (float): The distortion coefficient. Has to be smaller or equal
             to zero. Typical values lie in the range [-0.4 ... 0].
+
         dx (float): Offset of the distortion center in x-direction.
         dy (float): Offset of the distortion center in y-direction.
 
@@ -29,6 +35,9 @@ def compute_distort_maps(image_width, image_height, k=-0.4, dx=0, dy=0):
             a function of the distorted coordinates: xu = map_x(yd, xd).
         map_y (numpy.ndarray): Map which yields the undistorted y coordinate as
             a function of the distorted coordinates: yu = map_y(yd, xd).
+
+    To distort an image with the computed maps, use
+    `cv2.remap(image, map_x, map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)`
     """
     assert k <= 0, "Distortion parameter k has to be zero or negative."
     w, h = image_width, image_height
@@ -67,7 +76,7 @@ def compute_undistort_maps(image_width, image_height, k=-0.4, dx=0, dy=0):
     Arguments and return values are equivalent to `compute_distort_maps`. However,
     the maps can be used to undistort an image intead of distorting it. Thus,
     map_x yields xd = map_x(yu, xu) and map_y yields yd = map_y(yu, xu). Use the
-    computed maps with apply_maps to undistort an image.
+    computed maps with cv2.remap as explained for `compute_distort_maps`.
 
     The computed maps have an inverse meaning of the maps computed with
     `compute_distort_maps` when the same set of parameters (k, dx, dy) is used.
@@ -98,25 +107,26 @@ def compute_undistort_maps(image_width, image_height, k=-0.4, dx=0, dy=0):
     return map_x, map_y
 
 
-def apply_maps(image, map_x, map_y):
-    """Distort or undistorts an image based on precomputed maps.
-
-    Args:
-        image (numpy.ndarray): Input image.
-        map_x (numpy.ndarray): Distortion or undistortion map_x precomputed via
-            compute_distort_maps or compute_undistort_maps.
-        map_y (numpy.ndarray): Distortion or undistortion map_y precomputed via
-            compute_distort_maps or compute_undistort_maps.
-
-    Returns:
-        image (numpy.ndarray): Distorted or undistorted image.
-    """
-    image = cv2.remap(image, d_map_x, d_map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)
-    return image
+def draw_central_rectangle(image, dw, dh, dx, dy, color=(255, 255, 255)):
+    height, width, channel = image.shape
+    xmin = int(np.floor(width/2-dw+dx))
+    ymin = int(np.floor(height/2-dh+dy))
+    xmax = int(np.ceil(width/2+dw+dx))
+    ymax = int(np.ceil(height/2+dh+dy))
+    cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color)
+    cv2.circle(image, center=(int(width/2+dx), int(height/2+dy)), radius=10, color=color)
 
 
-def undistort_points(points, map_x, map_y):
-    pass
+def square_center_crop(image, size=None):
+    """Crops the image to a square. The shorter edge of the image determines the size after cropping."""
+    height, width, channel = image.shape
+    if not size:
+        size = np.min((height/2, width/2))
+    xmin = int(np.floor(width/2-size))
+    ymin = int(np.floor(height/2-size))
+    xmax = int(np.ceil(width/2+size-1))
+    ymax = int(np.ceil(height/2+size-1))
+    return image[ymin:ymax, xmin:xmax, :]
 
 
 def crop_max(image, width, height, map_x, map_y, dx, dy):
@@ -130,8 +140,8 @@ def crop_max(image, width, height, map_x, map_y, dx, dy):
         image (numpy.ndarray): Distorted input image of which region is to be cropped out.
         width (int): Width of the original undistorted image.
         height (int): Height of the original undistorted image.
-        map_x (numpy.ndarray): Undistortion map_x as computed with compute_undistort_maps.
-        map_y (numpy.ndarray): Undistortion map_y as computed with compute_undistort_maps.
+        map_x (numpy.ndarray): Undistortion map_x as computed with compute_undistort_maps().
+        map_y (numpy.ndarray): Undistortion map_y as computed with compute_undistort_maps().
         dx (float): Offset of the distortion center in x-direction.
         dy (float): Offset of the distortion center in y-direction.
 
@@ -174,28 +184,6 @@ def crop_max(image, width, height, map_x, map_y, dx, dy):
     return image_cropped, coords
 
 
-def draw_central_rectangle(image, dw, dh, dx, dy, color=(255, 255, 255)):
-    height, width, channel = image.shape
-    xmin = int(np.floor(width/2-dw+dx))
-    ymin = int(np.floor(height/2-dh+dy))
-    xmax = int(np.ceil(width/2+dw+dx))
-    ymax = int(np.ceil(height/2+dh+dy))
-    cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color)
-    cv2.circle(image, center=(int(width/2+dx), int(height/2+dy)), radius=10, color=color)
-
-
-def square_center_crop(image, size=None):
-    """Crops the image to a square. The shorter edge of the image determines the size after cropping."""
-    height, width, channel = image.shape
-    if not size:
-        size = np.min((height/2, width/2))
-    xmin = int(np.floor(width/2-size))
-    ymin = int(np.floor(height/2-size))
-    xmax = int(np.ceil(width/2+size-1))
-    ymax = int(np.ceil(height/2+size-1))
-    return image[ymin:ymax, xmin:xmax, :]
-
-
 if __name__ == "__main__":
 
     dx=0
@@ -214,10 +202,10 @@ if __name__ == "__main__":
     ud_map_x, ud_map_y = compute_undistort_maps(width, height, k, dx, dy)
 
     # distort the image
-    image_distorted = apply_maps(image, d_map_x, d_map_y)
+    image_distorted = cv2.remap(image, d_map_x, d_map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)
 
     # undistort the distorted image
-    image_undistorted = apply_maps(image_distorted, ud_map_x, ud_map_y)
+    image_undistorted = cv2.remap(image_distorted, ud_map_x, ud_map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)
 
     # crop distorted image (for training)
     image_distorted_cropped, (xmin, ymin, xmax, ymax) = crop_max(image_distorted, width, height, ud_map_x, ud_map_y, dx, dy)
