@@ -50,9 +50,7 @@ def compute_distort_maps(image_width, image_height, k=-0.4, dx=0, dy=0):
         rd = np.sqrt(xdr * xdr + ydr * ydr)
         theta = np.arctan2(ydr, xdr)
         # distort coordinates
-        d = 1/(4*k*k*rd*rd)+1/k
-        d[d<0] = 0
-        ru = -1/(2*k*rd)-np.sqrt(d)
+        ru = -1/(2*k*rd)-np.sqrt(1/(4*k*k*rd*rd)+1/k)
         # convert back to cartesian
         xur = ru * np.cos(theta)
         yur = ru * np.sin(theta)
@@ -129,41 +127,10 @@ def square_center_crop(image, size=None):
     return image[ymin:ymax, xmin:xmax, :]
 
 
-def crop_max(image, map_x, map_y):
-    """Crop out maximal central region from distorted image.
-
-    Distorting an image leaves the image border unspecified (black area).
-    This functions crops out the largest possible region which does not
-    contain any border.
-
-    Args:
-        image (numpy.ndarray): Distorted image.
-        width (int): Width of the original undistorted image.
-        height (int): Height of the original undistorted image.
-        k (float): The distortion coefficient. Has to be smaller or equal
-            to zero. Typical values lie in the range [-0.4 ... 0].
-
-        dx (float): Offset of the distortion center in x-direction.
-        dy (float): Offset of the distortion center in y-direction.
-
-    Returns:
-        cropped image (numpy.ndarray): Cropped version of the input image.
-    """
-    search_map = np.copy(map_x)
-    search_map[search_map >= 0] = True
-    search_map[search_map < 0] = False
-    search_map = search_map.astype(np.bool)
-    print(search_map)
-
-    # find smallest
-
-    return image_cropped
-
-
 if __name__ == "__main__":
 
     # dx=50
-    # dy=-50
+    # dy=50
     # k=-0.4
     #
     # image = cv2.imread("old/dataset_experiments/img.jpg")
@@ -177,26 +144,32 @@ if __name__ == "__main__":
     # d_map_x, d_map_y = compute_distort_maps(width, height, k, dx, dy)
     # ud_map_x, ud_map_y = compute_undistort_maps(width, height, k, dx, dy)
     #
-    # # distort the image
+    # # distort image
     # image_distorted = cv2.remap(image, d_map_x, d_map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)
     #
-    # # undistort the distorted image
-    # image_undistorted = cv2.remap(image_distorted, ud_map_x, ud_map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)
+    # # crop out a region of image_distorted
+    # dw=265
+    # dh=dw
+    # xmin = int(width/2-dw+dx)
+    # ymin = int(height/2-dh+dy)
+    # xmax = int(width/2+dw+dx+1)
+    # ymax = int(height/2+dh+dy+1)
+    # image_distorted_cropped = image_distorted[ymin:ymax, xmin:xmax, :]
     #
-    # # crop distorted image (for training)
-    # #dw = 250
-    # #dh = dw
-    # #xmin = int(width/2-dw+dx)
-    # #ymin = int(height/2-dh+dy)
-    # #xmax = int(width/2+dw+dx+1)
-    # #ymax = int(height/2+dh+dy+1)
-    # #image_distorted_cropped = image_distorted[ymin:ymax, xmin:xmax, :]
-    # image_distorted_cropped = crop_max(image_distorted, d_map_x, d_map_y)
+    # draw_central_rectangle(image_distorted, dw=230, dh=dw, dx=dx/2, dy=dx/2, color=(0, 255, 0))
+    #
+    # # # resize distorted and cropped image to original size
+    # image_distorted_cropped_resized = cv2.resize(image_distorted_cropped, (width, height), interpolation=cv2.INTER_LANCZOS4)
+    #
+    # # undistort the distorted image
+    # image_undistorted = cv2.remap(image_distorted_cropped_resized, ud_map_x, ud_map_y, interpolation=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT)
+    #
     #
     # while True:
     #     cv2.imshow("img_original", image)
     #     cv2.imshow("img_distorted", image_distorted)
-    #     cv2.imshow("img_distorted_cropped", image_distorted_cropped)
+    #     cv2.imshow("image_distorted_cropped", image_distorted_cropped)
+    #     #cv2.imshow("image_distorted_cropped_resized", image_distorted_cropped_resized)
     #     cv2.imshow("image_undistorted", image_undistorted)
     #     if cv2.waitKey(1) & 0xFF == ord('q'):
     #         break
@@ -208,11 +181,11 @@ if __name__ == "__main__":
     # distortion
 
     k = -0.4  # for normalized coordinates
-    dx = 10
-    dy = -10
+    dx = 0
+    dy = 0
 
-    h = 31
-    w = 51
+    h = 30
+    w = 50
 
     yu, xu = np.mgrid[0:h, 0:w]
 
@@ -235,22 +208,84 @@ if __name__ == "__main__":
     # distort coordinates
     rd = ru / (1 - k * ru * ru)
 
-    def border_correct(ru, rd, mode='crop'):
-        assert mode == 'fit' or mode == 'crop', "Invalid mode. Can be either 'fit' or 'crop'."
-        if mode == 'crop':
-            s = np.max((ru[0, 0] / rd[0, 0],
-                        ru[0, -1] / rd[0, -1],
-                        ru[-1, 0] / rd[-1, 0],
-                        ru[-1, -1] / rd[-1, -1]))
-            print(s)
-        #elif mode == 'fit':
-        #    center = (round(w/2), round(h/2))
-        #    R = np.sqrt(center[0]*center[0] + center[1]*center[1])
-        #    s = 1 / (1 + k * (np.min(center) / R) * (np.min(center) / R))
+    # def border_correct(xur, yur, xdr, ydr, mode):
+    #     assert mode == 'fit' or mode == 'crop', "Invalid mode. Can be either 'fit' or 'crop'."
+    #     if mode == "fit":
+    #         center_x = round(w/2+dx)
+    #         center_y = round(h/2+dy)
+    #         #pt_left_center = (xdr[center_y, 0], ydr[center_y, 0])
+    #         #pt_right_center = (xdr[center_y, -1], ydr[center_y, -1])
+    #         #pt_center_top = (xdr[-1, center_x], ydr[-1, center_x])
+    #         #pt_center_bottom = (xdr[0, center_x], ydr[0, center_x])
+    #
+    #         # get maximum width and height of distorted image
+    #         xdr_min, xdr_max = xdr[center_y, 0], xdr[center_y, -1]
+    #         ydr_min, ydr_max = ydr[0, center_x], ydr[-1, center_x]
+    #         width_d = xdr_max - xdr_min
+    #         height_d = ydr_max - ydr_min
+    #
+    #         # get maximum width and height of undistorted image
+    #         xur_min, xur_max = xur[center_y, 0], xur[center_y, -1]
+    #         yur_min, yur_max = yur[0, center_x], yur[-1, center_x]
+    #         width_u = xur_max - xur_min
+    #         height_u = yur_max - yur_min
+    #
+    #         # get scaling factors
+    #         sx = np.abs(xur_max - xur_min) / np.abs(xdr_max - xdr_min)
+    #         sy = np.abs(yur_max - yur_min) / np.abs(ydr_max - ydr_min)
+    #
+    #         # scale meshgrid in x and y direction
+    #         xdr = xdr * sx
+    #         ydr = ydr * sy
+    #
+    #         # remove offset
+    #         x_offset = xur[center_y, 0] - xdr[center_y, 0]
+    #         y_offset = yur[0, center_x] - ydr[0, center_x]
+    #         xdr = xdr + x_offset
+    #         ydr = ydr + y_offset
+    #
+    #     elif mode == "crop":
+    #         # get minimum width and height of distorted image
+    #         xdr_min = np.max((xdr[0, 0], xdr[-1, 0]))
+    #         xdr_max = np.min((xdr[0, -1], xdr[-1, -1]))
+    #         ydr_min = np.max((ydr[0, 0], ydr[-1, 0]))
+    #         ydr_max = np.min((ydr[0, -1], ydr[-1, -1]))
+    #         width_d = xdr_max - xdr_min
+    #         height_d = ydr_max - ydr_min
+    #
+    #         print(xdr_min, xdr_max)
+    #         print(ydr_min, ydr_max)
+    #
+    #         # get minimum width and height of undistorted image
+    #         xur_min = np.max((xur[0, 0], xur[-1, 0]))
+    #         xur_max = np.min((xur[0, -1], xur[-1, -1]))
+    #         yur_min = np.max((yur[0, 0], yur[-1, 0]))
+    #         yur_max = np.min((yur[0, -1], yur[-1, -1]))
+    #         width_u = xur_max - xur_min
+    #         height_u = yur_max - yur_min
+    #
+    #         # get scaling factors
+    #         sx = np.abs(xur_max - xur_min) / np.abs(xdr_max - xdr_min)
+    #         sy = np.abs(yur_max - yur_min) / np.abs(ydr_max - ydr_min)
+    #
+    #         # scale meshgrid in x and y direction
+    #         xdr = xdr * sx
+    #         ydr = ydr * sy
+    #
+    #         # remove offset
+    #         #x_offset = xur[center_y, 0] - xdr[center_y, 0]
+    #         #y_offset = yur[0, center_x] - ydr[0, center_x]
+    #         #xdr = xdr + x_offset
+    #         #ydr = ydr + y_offset
+    #
+    #     return xdr, ydr
+
+    def border_correct_crop(ru, rd, dx, dy):
+        s = ru[0, 0] / rd[0, 0]
         return s
 
     # rescale (crop or fit)
-    s = border_correct(ru, rd, mode='crop')
+    s = border_correct_crop(ru, rd, dx, dy)
     rd = rd * s
 
     # convert back to cartesian
@@ -265,7 +300,7 @@ if __name__ == "__main__":
     ax.grid()
     ax.scatter(xdr, ydr)
     ax.scatter(xur, yur)
-    ax.legend(['distorted', 'undistorted'])
+    ax.legend(['undistorted', 'distorted'])
     ax.set_title("distorting points")
 
     ##############################################################
