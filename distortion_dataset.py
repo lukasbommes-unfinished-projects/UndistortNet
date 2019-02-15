@@ -15,7 +15,12 @@ def _convert_to_pil(image):
     return Image.fromarray(image)
 
 def _convert_to_opencv(image):
-    return cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    image = np.array(image)
+    # if channel first, convert to channels last
+    if np.shape(image)[0] == 3:
+        image = np.moveaxis(image, -1, 0)
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    return image
 
 
 class DistortionDataset(torch.utils.data.Dataset):
@@ -31,7 +36,7 @@ class DistortionDataset(torch.utils.data.Dataset):
         self.dxs = np.array(range(-50, 51, 5))
         self.dys = np.array(range(-50, 51, 5))
         # image size (squre)
-        self.image_size = 512
+        self.image_size = 256
 
 
     def __len__(self):
@@ -60,34 +65,33 @@ class DistortionDataset(torch.utils.data.Dataset):
         maps = compute_maps(self.image_size, self.image_size, -4e-3*k, dx, dy)
         image_distorted = distort_image(image, maps)
         image_undistorted = undistort_image(image_distorted, maps)
+
+        # crop out the maximal central region to get rid of black border
+        image_distorted_cropped, coords = crop_max(image_distorted, self.image_size,
+            self.image_size, maps, dx, dy)
+
+        # convert to pyTorch compatible formats
         k = torch.tensor(k, dtype=torch.int64)
         dx = torch.tensor(dx, dtype=torch.int64)
         dy = torch.tensor(dy, dtype=torch.int64)
-
-        # crop out the maximal central region to get rid of black border
-        image_distorted_cropped = crop_max(image_distorted, self.image_size,
-            self.image_size, maps, dx, dy)
-
         image_distorted = _convert_to_pil(image_distorted)
         image_undistorted = _convert_to_pil(image_undistorted)
-        #image_distorted_cropped = _convert_to_pil(image_distorted_cropped)
+        image_distorted_cropped = _convert_to_pil(image_distorted_cropped)
 
         # resize the cropped distorted image back to original size
-        #image_distorted_cropped = transforms.Resize(self.image_size)(image_distorted_cropped)
+        image_distorted_cropped = transforms.Resize((self.image_size, self.image_size))(image_distorted_cropped)
 
         # convert image to tensor
         image_distorted = transforms.ToTensor()(image_distorted)
         image_undistorted = transforms.ToTensor()(image_undistorted)
-        #image_distorted_cropped = transforms.ToTensor()(image_distorted_cropped)
+        image_distorted_cropped = transforms.ToTensor()(image_distorted_cropped)
 
         # normalize (needed for pretrained backbone)
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         image_distorted = normalize(image_distorted)
         image_undistorted = normalize(image_undistorted)
-        #image_distorted_cropped = normalize(image_distorted_cropped)
+        image_distorted_cropped = normalize(image_distorted_cropped)
 
-        #images = (image_distorted, image_distorted_cropped, image_undistorted)
-        images = (image_distorted, image_distorted, image_undistorted)
-        parameters = (k, dx, dy)
+        data = (image_distorted, image_distorted_cropped, image_undistorted, k, dx, dy)
 
-        return images, parameters
+        return data

@@ -199,28 +199,28 @@ def crop_max(image, width, height, maps, dx, dy):
         has to be distorted first before being fed into this function. The maps
         tuple used for this distortion has to be used as an argument here.
     """
-    ud_map_x = maps[2]
-    ud_map_y = maps[3]
+    d_map_x = maps[0]
+    d_map_y = maps[1]
     if dx >= 0 and dy >= 0:
-        xd_min = ud_map_x[0, 0]  # y, x
-        xd_max = ud_map_x[0, width-1]
-        yd_min = ud_map_y[0, 0]
-        yd_max = ud_map_y[height-1, 0]
+        xd_min = d_map_x[0, 0]  # y, x
+        xd_max = d_map_x[0, width-1]
+        yd_min = d_map_y[0, 0]
+        yd_max = d_map_y[height-1, 0]
     elif dx < 0 and dy < 0:
-        xd_min = ud_map_x[height-1, 0]
-        xd_max = ud_map_x[height-1, width-1]
-        yd_min = ud_map_y[0, width-1]
-        yd_max = ud_map_y[height-1, width-1]
+        xd_min = d_map_x[height-1, 0]
+        xd_max = d_map_x[height-1, width-1]
+        yd_min = d_map_y[0, width-1]
+        yd_max = d_map_y[height-1, width-1]
     elif dx >= 0 and dy < 0:
-        xd_min = ud_map_x[height-1, 0]
-        xd_max = ud_map_x[height-1, width-1]
-        yd_min = ud_map_y[0, 0]
-        yd_max = ud_map_y[height-1, 0]
+        xd_min = d_map_x[height-1, 0]
+        xd_max = d_map_x[height-1, width-1]
+        yd_min = d_map_y[0, 0]
+        yd_max = d_map_y[height-1, 0]
     elif dx < 0 and dy >= 0:
-        xd_min = ud_map_x[0, 0]
-        xd_max = ud_map_x[0, width-1]
-        yd_min = ud_map_y[0, width-1]
-        yd_max = ud_map_y[height-1, width-1]
+        xd_min = d_map_x[0, 0]
+        xd_max = d_map_x[0, width-1]
+        yd_min = d_map_y[0, width-1]
+        yd_max = d_map_y[height-1, width-1]
     xd_min = int(xd_min)
     xd_max = int(xd_max)
     yd_min = int(yd_min)
@@ -262,8 +262,8 @@ def square_center_crop(image, size=None):
 
 if __name__ == "__main__":
 
-    dx=0
-    dy=0
+    dx=-10
+    dy=50
     k=-0.4
 
     ##########################################################################
@@ -271,7 +271,7 @@ if __name__ == "__main__":
     ##########################################################################
 
     # prepare inpu timage
-    image = cv2.imread("old/dataset_experiments/img.jpg")
+    image = cv2.imread("distortion_test.jpg")
     draw_central_rectangle(image, dw=130, dh=130, dx=0, dy=0, color=(0, 0, 255))
 
     # crop out largest possible square
@@ -295,18 +295,18 @@ if __name__ == "__main__":
     # distortion & undistortion of points
     ##########################################################################
 
-    # prepare points
-    points = np.array([[100.5, 100.5],
-                       [400, 100],
-                       [100, 400],
-                       [400, 400]])
-    draw_points(image, points, color=(255, 0, 255))
-
-    distorted_points = distort_points(points, maps)
-    draw_points(image_distorted, distorted_points, color=(255, 0, 255))
-
-    undistorted_points = undistort_points(distorted_points, maps)
-    draw_points(image_undistorted, undistorted_points, color=(255, 0, 255))
+    # # prepare points
+    # points = np.array([[100.5, 100.5],
+    #                    [400, 100],
+    #                    [100, 400],
+    #                    [400, 400]])
+    # draw_points(image, points, color=(255, 0, 255))
+    #
+    # distorted_points = distort_points(points, maps)
+    # draw_points(image_distorted, distorted_points, color=(255, 0, 255))
+    #
+    # undistorted_points = undistort_points(distorted_points, maps)
+    # draw_points(image_undistorted, undistorted_points, color=(255, 0, 255))
 
 
     ##########################################################################
@@ -316,7 +316,7 @@ if __name__ == "__main__":
     while True:
         cv2.imshow("img_original", image)
         cv2.imshow("img_distorted", image_distorted)
-        #cv2.imshow("img_distorted_cropped", image_distorted_cropped)
+        cv2.imshow("img_distorted_cropped", image_distorted_cropped)
         cv2.imshow("image_undistorted", image_undistorted)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
