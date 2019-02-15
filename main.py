@@ -8,6 +8,8 @@ import cv2
 import PIL.Image
 from tqdm import *
 
+from visdom import Visdom
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -17,12 +19,16 @@ from torch.optim import lr_scheduler
 import torchvision
 from torchvision import datasets, models, transforms
 
-from distortion_dataset import DistortionDataset
+from distortion_dataset import DistortionDataset, classes_to_parameters
 
 
-# TODO:
-# - save checkpoint files every K iterations
-# - visualize training via visdom plots
+# Experiments:
+# - Try to do normal regression instead of binned outputs
+# - change network architecture
+# - try different losses
+# - look at network output (what is it predicting? Visualize prediction results.)
+# - play around with optimizer params
+# - try end-to-end training with undistort layer
 
 np.random.seed(0)
 
@@ -76,12 +82,12 @@ class UndistortNet(nn.Module):
         # linear output layers
         self.fc1 = nn.Linear(in_features=8192, out_features=1024)
         self.fc2 = nn.Linear(in_features=1024, out_features=1024)
-        self.fc_k = nn.Linear(in_features=1024, out_features=101)
+        self.fc_k = nn.Linear(in_features=1024, out_features=21)
         self.fc_dx = nn.Linear(in_features=1024, out_features=21)
         self.fc_dy = nn.Linear(in_features=1024, out_features=21)
 
     def forward(self, x):
-        debug = True
+        debug = False
         if debug: print("input: ", x.shape)
 
         # 3 x 3 conv layer on raw input image
@@ -230,11 +236,18 @@ def visualize_data(dataloaders, num_images=3, phase='train'):
 
 
 if __name__ == "__main__":
+
+    # for visualization
+    vis = Visdom(server="http://undistort_net_visdom", port=8097)
+    print("Visualizing network training via Visdom. Connect to http://localhost:8097 to view stats.")
+
+    # model setup, training and validation
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     torch.cuda.empty_cache()
 
-    # network setup
+    # network setup (run on both GPUs)
     model = UndistortNet()
+    model = torch.nn.DataParallel(model, device_ids=[0, 1])
     print(model)
     model = model.to(device)
 
@@ -246,14 +259,14 @@ if __name__ == "__main__":
     loss_dy_criterion = nn.NLLLoss(reduction="mean")
 
     # optimizer, learning rate, etc.
-    optimizer = optim.Adam(model.parameters(), lr=1e-3)
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)
+    optimizer = optim.Adam(model.parameters(), lr=0.01)  # 1e-3
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.1)
 
     # load data
     data_dir = 'dataset'
     image_datasets = {x: DistortionDataset(os.path.join(data_dir, x)) for x in ['train', 'val']}
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x],
-                   batch_size=16, shuffle=True, num_workers=12)
+                   batch_size=64, shuffle=True, num_workers=12)
                    for x in ['train', 'val']}
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 
@@ -262,12 +275,12 @@ if __name__ == "__main__":
     if True:
 
         # train network
-        num_epochs = 100
-
-        best_model_weights = copy.deepcopy(model.state_dict())
+        num_epochs = 10
         lowest_loss = 9999.99
 
         t0 = time.time()
+
+        win = vis.line([0], [-1], opts=dict(title="Losses", xlabel="Step", ylabel="Loss"))
 
         for epoch in range(num_epochs):
             t0_epoch = time.time()
@@ -284,7 +297,7 @@ if __name__ == "__main__":
                 running_loss = 0.0
 
                 # iterate over data
-                for data in tqdm(dataloaders[phase], desc=phase):
+                for step, data in enumerate(dataloaders[phase]):
                     im_d, im_d_c, im_ud, k, dx, dy = data
 
                     # move to GPU
@@ -303,7 +316,7 @@ if __name__ == "__main__":
                         loss_k = loss_k_criterion(k_pred, k)
                         loss_dx = loss_k_criterion(dx_pred, dx)
                         loss_dy = loss_k_criterion(dy_pred, dy)
-                        loss = loss_k# + loss_dx + loss_dy
+                        loss = loss_k + loss_dx + loss_dy
 
                         # backprop when in training phase
                         if phase == "train":
@@ -311,7 +324,12 @@ if __name__ == "__main__":
                             optimizer.step()
 
                     # stats
-                    running_loss += loss.item() * x.size(0)
+                    running_loss += loss.item() * im_d_c.size(0)
+
+                    # report every 10 steps
+                    if step % 10 == 0:
+                        print("step: {}, loss: {}".format(step, loss.item()))
+                        vis.line([loss.item()], [step], win=win, update='append')
 
                 epoch_loss = running_loss / dataset_sizes[phase]
 
@@ -319,11 +337,21 @@ if __name__ == "__main__":
 
                 print("{} Loss: {:.4f}, took {:.1f} s".format(phase, epoch_loss, t_elapsed_epoch))
 
-                # keep model if it is better than in previous epoch
+                # create and safe checkpoint
+                checkpoint = {
+                    "epoch": epoch,
+                    'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': loss
+                }
+                torch.save(checkpoint, "model/checkpoints/checkpoint_epoch_{}.tar".format(epoch))
+                print("Saved checkpoint.")
+
+                # safe separate checkpoint if model is better than in previous epoch
                 if phase == "val" and epoch_loss < lowest_loss:
                     lowest_loss = epoch_loss
-                    best_model_weights = copy.deepcopy(model.state_dict())
-                    print("saved model in epoch {} as new best model".format(epoch))
+                    torch.save(checkpoint, "model/checkpoints/best_model.tar")
+                    print("Saved model in epoch {} as new best model.".format(epoch))
 
         time_elapsed = time.time() - t0
         print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))

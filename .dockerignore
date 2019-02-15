@@ -2,6 +2,7 @@ ADE20K
 create_dataset
 create_dataset_ILSVRC
 dataset
+model
 old
 __pycache__
 .git

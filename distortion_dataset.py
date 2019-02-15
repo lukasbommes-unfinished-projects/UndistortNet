@@ -14,6 +14,7 @@ def _convert_to_pil(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return Image.fromarray(image)
 
+
 def _convert_to_opencv(image):
     image = np.array(image)
     # if channel first, convert to channels last
@@ -21,6 +22,45 @@ def _convert_to_opencv(image):
         image = np.moveaxis(image, -1, 0)
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     return image
+
+
+def classes_to_parameters(ks_c, dxs_c, dys_c):
+    """Transform class indices to distortion parameter values.
+
+    Args:
+        ks_c (ints): class index for k, e.g. {0, 1, ..., 21}
+        dxs_c (ints): class index for dx, e.g. {0, 1, ..., 21}
+        dys_c (ints): class index for for dy, e.g. {0, 1, ..., 21}
+
+    Returns:
+        ks (float): Actual value for k, e.g. [0, -0.02, ..., -0.4]
+        dx (float): Actual value for dx, e.g. [-50, -45, ..., 50]
+        dy (float):Actual value for dy, e.g. [-50, -45, ..., 50]
+    """
+    ks = -20e-3*ks_c
+    dxs = 5*dxs_c-50
+    dys = 5*dys_c-50
+    return ks, dxs, dys
+
+
+def parameters_to_classes(ks, dxs, dys):
+    """Transform class indices to distortion parameter values.
+
+    Args:
+        ks (float): Actual value for k, e.g. [0, -0.02, ..., -0.4]
+        dx (float): Actual value for dx, e.g. [-50, -45, ..., 50]
+        dy (float):Actual value for dy, e.g. [-50, -45, ..., 50]
+
+    Returns:
+        ks_c (ints): class index for k, e.g. {0, 1, ..., 21}
+        dxs_c (ints): class index for dx, e.g. {0, 1, ..., 21}
+        dys_c (ints): class index for for dy, e.g. {0, 1, ..., 21}
+    """
+    ks_c = (ks/-20e-3).astype(np.int)
+    dxs_c = ((dxs+50)/5).astype(np.int)
+    dys_c = ((dys+50)/5).astype(np.int)
+    return ks_c, dxs_c, dys_c
+
 
 
 class DistortionDataset(torch.utils.data.Dataset):
@@ -32,9 +72,9 @@ class DistortionDataset(torch.utils.data.Dataset):
             image_path_wnid = glob.glob(os.path.join(self.root_dir, wnid, "*.jpg"))
             self.image_paths.extend(image_path_wnid)
         # distortion parameter ranges
-        self.ks = np.array(range(0, 101, 5)) # gets multiplied with -4e-3 later
-        self.dxs = np.array(range(-50, 51, 5))
-        self.dys = np.array(range(-50, 51, 5))
+        self.ks = np.array(range(0, 21))
+        self.dxs = np.array(range(0, 21))
+        self.dys = np.array(range(0, 21))
         # image size (squre)
         self.image_size = 256
 
@@ -57,12 +97,13 @@ class DistortionDataset(torch.utils.data.Dataset):
         image = _convert_to_opencv(image)
 
         # sample randomly from possible distortion parameters
-        k = np.random.choice(self.ks)
-        dx = np.random.choice(self.dxs)
-        dy = np.random.choice(self.dys)
+        k_c = np.random.choice(self.ks)
+        dx_c = np.random.choice(self.dxs)
+        dy_c = np.random.choice(self.dys)
 
         # distort image with sampled distortion parameters
-        maps = compute_maps(self.image_size, self.image_size, -4e-3*k, dx, dy)
+        k, dx, dy = classes_to_parameters(k_c, dx_c, dy_c)
+        maps = compute_maps(self.image_size, self.image_size, k, dx, dy)
         image_distorted = distort_image(image, maps)
         image_undistorted = undistort_image(image_distorted, maps)
 
@@ -71,9 +112,9 @@ class DistortionDataset(torch.utils.data.Dataset):
             self.image_size, maps, dx, dy)
 
         # convert to pyTorch compatible formats
-        k = torch.tensor(k, dtype=torch.int64)
-        dx = torch.tensor(dx, dtype=torch.int64)
-        dy = torch.tensor(dy, dtype=torch.int64)
+        k_c = torch.tensor(k_c, dtype=torch.int64)
+        dx_c = torch.tensor(dx_c, dtype=torch.int64)
+        dy_c = torch.tensor(dy_c, dtype=torch.int64)
         image_distorted = _convert_to_pil(image_distorted)
         image_undistorted = _convert_to_pil(image_undistorted)
         image_distorted_cropped = _convert_to_pil(image_distorted_cropped)
@@ -92,6 +133,6 @@ class DistortionDataset(torch.utils.data.Dataset):
         image_undistorted = normalize(image_undistorted)
         image_distorted_cropped = normalize(image_distorted_cropped)
 
-        data = (image_distorted, image_distorted_cropped, image_undistorted, k, dx, dy)
+        data = (image_distorted, image_distorted_cropped, image_undistorted, k_c, dx_c, dy_c)
 
         return data
