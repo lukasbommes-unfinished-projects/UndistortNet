@@ -19,7 +19,8 @@ from torch.optim import lr_scheduler
 import torchvision
 from torchvision import datasets, models, transforms
 
-from distortion_dataset import DistortionDataset, classes_to_parameters
+from distortion_dataset import DistortionDataset
+from undistort_layer import UndistortLayer
 
 
 # Experiments:
@@ -47,6 +48,9 @@ class UndistortNet(nn.Module):
         #    param.requires_grad = True
 
         self.rawim_conv2d = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)
+
+        # undistortion layer
+        self.undistort_layer = UndistortLayer()
 
         # tranpose convolution for feature upsampling
         self.deconv2d_1 = nn.ConvTranspose2d(in_channels=2048, out_channels=512, kernel_size=2, stride=2)
@@ -89,16 +93,16 @@ class UndistortNet(nn.Module):
         self.fc_dx = nn.Linear(in_features=1024, out_features=1)
         self.fc_dy = nn.Linear(in_features=1024, out_features=1)
 
-    def forward(self, x):
-        debug = True
-        if debug: print("input: ", x.shape)
+    def forward(self, im_d):
+        debug = False
+        if debug: print("input: ", im_d.shape)
 
         # 3 x 3 conv layer on raw input image
-        x_raw_image = self.rawim_conv2d(x)
+        x_raw_image = self.rawim_conv2d(im_d)
         if debug: print("x_raw_image conv", x_raw_image.shape)
 
         # extract features with pretrained base network (TODO: take out features of lower layers)
-        x_features = self.base_model(x)
+        x_features = self.base_model(im_d)
         if debug: print("base network: ", x_features.shape)
 
         # deconvolution to rise spatial resolution of extracted features
@@ -175,9 +179,6 @@ class UndistortNet(nn.Module):
         # linear output layers
         # --------- FC 1 ---------
         x = x.view(x.size(0), -1)
-        #if self.fc1 is None:
-        #    self.fc1 = nn.Linear(in_features=x.size(1), out_features=1024)
-        #    self.fc1 = self.fc1.to(device)
         x = self.fc1(x)
         if debug: print("FC 1: ", x.shape)
         x = F.relu(x)
@@ -192,18 +193,37 @@ class UndistortNet(nn.Module):
         #k = F.log_softmax(k, dim=1)
         k = F.relu(k)
         if debug: print("FC k: ", k.shape)
-        # --------- FC dx ---------
-        dx = self.fc_dx(x)
-        #dx = F.log_softmax(dx, dim=1)
-        dx = F.relu(dx)
-        if debug: print("FC dx: ", dx.shape)
-        # --------- FC dy ---------
-        dy = self.fc_dy(x)
-        #dy = F.log_softmax(dy, dim=1)
-        dy = F.relu(dy)
-        if debug: print("FC dy: ", dy.shape)
+        # # --------- FC dx ---------
+        # dx = self.fc_dx(x)
+        # #dx = F.log_softmax(dx, dim=1)
+        # dx = F.relu(dx)
+        # if debug: print("FC dx: ", dx.shape)
+        # # --------- FC dy ---------
+        # dy = self.fc_dy(x)
+        # #dy = F.log_softmax(dy, dim=1)
+        # dy = F.relu(dy)
+        # if debug: print("FC dy: ", dy.shape)
 
-        return k, dx, dy
+        # move output values to CPU
+        im_d = im_d.cpu()
+        k = k.cpu()
+        #dx = dx.cpu()
+        #dy = dy.cpu()
+
+        # limit ranges
+        k = -k-0.001
+        #k = -1*torch.clamp(k, min=0.001, max=0.4)  # k will be in [-0.4 .. 0.001]
+        #dx = torch.clamp(dx, min=0, max=100)-50  # dx will be in [-50 .. 50]
+        #dy = torch.clamp(dy, min=0, max=100)-50  # dy will be in [-50 .. 50]
+        dx = torch.zeros(k.shape, dtype=torch.float)
+        dy = torch.zeros(k.shape, dtype=torch.float)
+
+        # undistort input image with estimated parameters
+        print("k_pred:", k)
+        im_ud = self.undistort_layer(im_d, k, dx, dy)
+        im_ud = im_ud.to(device)
+
+        return im_ud
 
 
 def _convert_to_opencv(image):
@@ -260,16 +280,11 @@ if __name__ == "__main__":
     print("Number of trainable parameters: {}".format(count_parameters(model)))
 
     # define losses
-    # loss_k_criterion = nn.NLLLoss(reduction="mean")
-    # loss_dx_criterion = nn.NLLLoss(reduction="mean")
-    # loss_dy_criterion = nn.NLLLoss(reduction="mean")
-    loss_k_criterion = nn.MSELoss()
-    loss_dx_criterion = nn.MSELoss()
-    loss_dy_criterion = nn.MSELoss()
+    loss_criterion = nn.MSELoss(reduction="sum")
 
     # optimizer, learning rate, etc.
-    optimizer = optim.Adam(model.parameters(), lr=0.01)  # 1e-3
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.1)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)  # 1e-3
+    #exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.1)
 
     # load data
     data_dir = 'dataset'
@@ -300,7 +315,7 @@ if __name__ == "__main__":
 
             for phase in ["train", "val"]:
                 if phase == "train":
-                    exp_lr_scheduler.step()
+                    #exp_lr_scheduler.step()
                     model.train()
                 else:
                     model.eval()
@@ -310,6 +325,7 @@ if __name__ == "__main__":
                 # iterate over data
                 for step, data in enumerate(dataloaders[phase]):
                     im_d, im_d_c, im_ud, k, dx, dy = data
+                    print("k_desired: ", k)
 
                     # move to GPU
                     im_d = im_d.to(device)  # [B, 3, 512, 512]
@@ -323,15 +339,13 @@ if __name__ == "__main__":
 
                     # forward pass
                     with torch.set_grad_enabled(phase == "train"):
-                        k_pred, dx_pred, dy_pred = model(im_d_c)
-                        print("k_pred shape: ", np.shape(k_pred))
-                        print("k shape: ", np.shape(k))
-                        print("k: ", k)
-                        print("k_pred: ", torch.argmax(k_pred, dim=1))
-                        loss_k = loss_k_criterion(k_pred, k)
-                        loss_dx = loss_k_criterion(dx_pred, dx)
-                        loss_dy = loss_k_criterion(dy_pred, dy)
-                        loss = loss_k + loss_dx + loss_dy
+                        im_ud_pred = model(im_d)
+
+                        #cv2.imshow("im_d", _convert_to_opencv(im_d[0, :, :, :].detach().cpu()))
+                        #cv2.imshow("im_ud", _convert_to_opencv(im_ud[0, :, :, :].detach().cpu()))
+                        #cv2.waitKey(1)
+
+                        loss = loss_criterion(im_ud_pred, im_ud)
 
                         # backprop when in training phase
                         if phase == "train":

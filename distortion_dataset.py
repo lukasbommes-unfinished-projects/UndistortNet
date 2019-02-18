@@ -24,42 +24,42 @@ def _convert_to_opencv(image):
     return image
 
 
-def classes_to_parameters(ks_c, dxs_c, dys_c):
-    """Transform class indices to distortion parameter values.
-
-    Args:
-        ks_c (ints): class index for k, e.g. {0, 1, ..., 21}
-        dxs_c (ints): class index for dx, e.g. {0, 1, ..., 21}
-        dys_c (ints): class index for for dy, e.g. {0, 1, ..., 21}
-
-    Returns:
-        ks (float): Actual value for k, e.g. [0, -0.02, ..., -0.4]
-        dx (float): Actual value for dx, e.g. [-50, -45, ..., 50]
-        dy (float):Actual value for dy, e.g. [-50, -45, ..., 50]
-    """
-    ks = -20e-3*ks_c
-    dxs = 5*dxs_c-50
-    dys = 5*dys_c-50
-    return ks, dxs, dys
-
-
-def parameters_to_classes(ks, dxs, dys):
-    """Transform class indices to distortion parameter values.
-
-    Args:
-        ks (float): Actual value for k, e.g. [0, -0.02, ..., -0.4]
-        dx (float): Actual value for dx, e.g. [-50, -45, ..., 50]
-        dy (float):Actual value for dy, e.g. [-50, -45, ..., 50]
-
-    Returns:
-        ks_c (ints): class index for k, e.g. {0, 1, ..., 21}
-        dxs_c (ints): class index for dx, e.g. {0, 1, ..., 21}
-        dys_c (ints): class index for for dy, e.g. {0, 1, ..., 21}
-    """
-    ks_c = (ks/-20e-3).astype(np.int)
-    dxs_c = ((dxs+50)/5).astype(np.int)
-    dys_c = ((dys+50)/5).astype(np.int)
-    return ks_c, dxs_c, dys_c
+# def classes_to_parameters(ks_c, dxs_c, dys_c):
+#     """Transform class indices to distortion parameter values.
+#
+#     Args:
+#         ks_c (ints): class index for k, e.g. {0, 1, ..., 21}
+#         dxs_c (ints): class index for dx, e.g. {0, 1, ..., 21}
+#         dys_c (ints): class index for for dy, e.g. {0, 1, ..., 21}
+#
+#     Returns:
+#         ks (float): Actual value for k, e.g. [0, -0.02, ..., -0.4]
+#         dx (float): Actual value for dx, e.g. [-50, -45, ..., 50]
+#         dy (float):Actual value for dy, e.g. [-50, -45, ..., 50]
+#     """
+#     ks = -20e-3*ks_c
+#     dxs = 5*dxs_c-50
+#     dys = 5*dys_c-50
+#     return ks, dxs, dys
+#
+#
+# def parameters_to_classes(ks, dxs, dys):
+#     """Transform class indices to distortion parameter values.
+#
+#     Args:
+#         ks (float): Actual value for k, e.g. [0, -0.02, ..., -0.4]
+#         dx (float): Actual value for dx, e.g. [-50, -45, ..., 50]
+#         dy (float):Actual value for dy, e.g. [-50, -45, ..., 50]
+#
+#     Returns:
+#         ks_c (ints): class index for k, e.g. {0, 1, ..., 21}
+#         dxs_c (ints): class index for dx, e.g. {0, 1, ..., 21}
+#         dys_c (ints): class index for for dy, e.g. {0, 1, ..., 21}
+#     """
+#     ks_c = (ks/-20e-3).astype(np.int)
+#     dxs_c = ((dxs+50)/5).astype(np.int)
+#     dys_c = ((dys+50)/5).astype(np.int)
+#     return ks_c, dxs_c, dys_c
 
 
 
@@ -71,11 +71,11 @@ class DistortionDataset(torch.utils.data.Dataset):
         for wnid in wnids:
             image_path_wnid = glob.glob(os.path.join(self.root_dir, wnid, "*.jpg"))
             self.image_paths.extend(image_path_wnid)
-        # distortion parameter ranges
-        self.ks = np.array(range(0, 21))
-        self.dxs = np.array(range(0, 21))
-        self.dys = np.array(range(0, 21))
-        # image size (squre)
+        # possible distortion parameters
+        #self.ks = np.linspace(-0.4, -0.001, 100)
+        #self.dxs = np.linspace(-50, 50, 100)
+        #self.dys = np.linspace(-50, 50, 100)
+        # image size (square)
         self.image_size = 256
 
 
@@ -97,12 +97,11 @@ class DistortionDataset(torch.utils.data.Dataset):
         image = _convert_to_opencv(image)
 
         # sample randomly from possible distortion parameters
-        k_c = np.random.choice(self.ks)
-        dx_c = np.random.choice(self.dxs)
-        dy_c = np.random.choice(self.dys)
+        k = -0.4 * np.random.rand() - 0.01  # [-0.4 .. -0.01]
+        dx = 0 #100 * np.random.rand() - 50  # [-50 .. 50]
+        dy = 0 #100 * np.random.rand() - 50  # [-50 .. 50]
 
         # distort image with sampled distortion parameters
-        k, dx, dy = classes_to_parameters(k_c, dx_c, dy_c)
         maps = compute_maps(self.image_size, self.image_size, k, dx, dy)
         image_distorted = distort_image(image, maps)
         image_undistorted = undistort_image(image_distorted, maps)
@@ -112,12 +111,9 @@ class DistortionDataset(torch.utils.data.Dataset):
             self.image_size, maps, dx, dy)
 
         # convert to pyTorch compatible formats
-        #k_c = torch.tensor(k_c, dtype=torch.int64)
-        #dx_c = torch.tensor(dx_c, dtype=torch.int64)
-        #dy_c = torch.tensor(dy_c, dtype=torch.int64)
-        k_c = torch.tensor(k_c, dtype=torch.float32)
-        dx_c = torch.tensor(dx_c, dtype=torch.float32)
-        dy_c = torch.tensor(dy_c, dtype=torch.float32)
+        k_c = torch.tensor(k, dtype=torch.float32)
+        dx_c = torch.tensor(dx, dtype=torch.float32)
+        dy_c = torch.tensor(dy, dtype=torch.float32)
         image_distorted = _convert_to_pil(image_distorted)
         image_undistorted = _convert_to_pil(image_undistorted)
         image_distorted_cropped = _convert_to_pil(image_distorted_cropped)
