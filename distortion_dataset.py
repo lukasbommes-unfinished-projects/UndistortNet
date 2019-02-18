@@ -112,9 +112,12 @@ class DistortionDataset(torch.utils.data.Dataset):
             self.image_size, maps, dx, dy)
 
         # convert to pyTorch compatible formats
-        k_c = torch.tensor(k_c, dtype=torch.int64)
-        dx_c = torch.tensor(dx_c, dtype=torch.int64)
-        dy_c = torch.tensor(dy_c, dtype=torch.int64)
+        #k_c = torch.tensor(k_c, dtype=torch.int64)
+        #dx_c = torch.tensor(dx_c, dtype=torch.int64)
+        #dy_c = torch.tensor(dy_c, dtype=torch.int64)
+        k_c = torch.tensor(k_c, dtype=torch.float32)
+        dx_c = torch.tensor(dx_c, dtype=torch.float32)
+        dy_c = torch.tensor(dy_c, dtype=torch.float32)
         image_distorted = _convert_to_pil(image_distorted)
         image_undistorted = _convert_to_pil(image_undistorted)
         image_distorted_cropped = _convert_to_pil(image_distorted_cropped)

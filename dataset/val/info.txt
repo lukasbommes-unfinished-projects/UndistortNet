@@ -1,0 +1,1 @@
+This folder here is copied from the train dir. So it canbe safely deleted.

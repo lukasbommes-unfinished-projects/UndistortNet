@@ -30,7 +30,7 @@ from distortion_dataset import DistortionDataset, classes_to_parameters
 # - play around with optimizer params
 # - try end-to-end training with undistort layer
 
-np.random.seed(0)
+#np.random.seed(0)
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -82,12 +82,15 @@ class UndistortNet(nn.Module):
         # linear output layers
         self.fc1 = nn.Linear(in_features=8192, out_features=1024)
         self.fc2 = nn.Linear(in_features=1024, out_features=1024)
-        self.fc_k = nn.Linear(in_features=1024, out_features=21)
-        self.fc_dx = nn.Linear(in_features=1024, out_features=21)
-        self.fc_dy = nn.Linear(in_features=1024, out_features=21)
+        # self.fc_k = nn.Linear(in_features=1024, out_features=21)
+        # self.fc_dx = nn.Linear(in_features=1024, out_features=21)
+        # self.fc_dy = nn.Linear(in_features=1024, out_features=21)
+        self.fc_k = nn.Linear(in_features=1024, out_features=1)
+        self.fc_dx = nn.Linear(in_features=1024, out_features=1)
+        self.fc_dy = nn.Linear(in_features=1024, out_features=1)
 
     def forward(self, x):
-        debug = False
+        debug = True
         if debug: print("input: ", x.shape)
 
         # 3 x 3 conv layer on raw input image
@@ -186,15 +189,18 @@ class UndistortNet(nn.Module):
         x = self.dropout(x)
         # --------- FC k ---------
         k = self.fc_k(x)
-        k = F.log_softmax(k, dim=1)
+        #k = F.log_softmax(k, dim=1)
+        k = F.relu(k)
         if debug: print("FC k: ", k.shape)
         # --------- FC dx ---------
         dx = self.fc_dx(x)
-        dx = F.log_softmax(dx, dim=1)
+        #dx = F.log_softmax(dx, dim=1)
+        dx = F.relu(dx)
         if debug: print("FC dx: ", dx.shape)
         # --------- FC dy ---------
         dy = self.fc_dy(x)
-        dy = F.log_softmax(dy, dim=1)
+        #dy = F.log_softmax(dy, dim=1)
+        dy = F.relu(dy)
         if debug: print("FC dy: ", dy.shape)
 
         return k, dx, dy
@@ -254,9 +260,12 @@ if __name__ == "__main__":
     print("Number of trainable parameters: {}".format(count_parameters(model)))
 
     # define losses
-    loss_k_criterion = nn.NLLLoss(reduction="mean")
-    loss_dx_criterion = nn.NLLLoss(reduction="mean")
-    loss_dy_criterion = nn.NLLLoss(reduction="mean")
+    # loss_k_criterion = nn.NLLLoss(reduction="mean")
+    # loss_dx_criterion = nn.NLLLoss(reduction="mean")
+    # loss_dy_criterion = nn.NLLLoss(reduction="mean")
+    loss_k_criterion = nn.MSELoss()
+    loss_dx_criterion = nn.MSELoss()
+    loss_dy_criterion = nn.MSELoss()
 
     # optimizer, learning rate, etc.
     optimizer = optim.Adam(model.parameters(), lr=0.01)  # 1e-3
@@ -265,8 +274,10 @@ if __name__ == "__main__":
     # load data
     data_dir = 'dataset'
     image_datasets = {x: DistortionDataset(os.path.join(data_dir, x)) for x in ['train', 'val']}
+    def worker_init(worker_id):
+        np.random.seed(worker_id)
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x],
-                   batch_size=64, shuffle=True, num_workers=12)
+                   batch_size=64, shuffle=True, num_workers=8, worker_init_fn=worker_init)
                    for x in ['train', 'val']}
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
 
@@ -313,6 +324,10 @@ if __name__ == "__main__":
                     # forward pass
                     with torch.set_grad_enabled(phase == "train"):
                         k_pred, dx_pred, dy_pred = model(im_d_c)
+                        print("k_pred shape: ", np.shape(k_pred))
+                        print("k shape: ", np.shape(k))
+                        print("k: ", k)
+                        print("k_pred: ", torch.argmax(k_pred, dim=1))
                         loss_k = loss_k_criterion(k_pred, k)
                         loss_dx = loss_k_criterion(dx_pred, dx)
                         loss_dy = loss_k_criterion(dy_pred, dy)

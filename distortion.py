@@ -262,8 +262,8 @@ def square_center_crop(image, size=None):
 
 if __name__ == "__main__":
 
-    dx=-10
-    dy=50
+    dx=50
+    dy=-10
     k=-0.4
 
     ##########################################################################
@@ -295,19 +295,24 @@ if __name__ == "__main__":
     # distortion & undistortion of points
     ##########################################################################
 
-    # # prepare points
-    # points = np.array([[100.5, 100.5],
-    #                    [400, 100],
-    #                    [100, 400],
-    #                    [400, 400]])
-    # draw_points(image, points, color=(255, 0, 255))
-    #
-    # distorted_points = distort_points(points, maps)
-    # draw_points(image_distorted, distorted_points, color=(255, 0, 255))
-    #
-    # undistorted_points = undistort_points(distorted_points, maps)
-    # draw_points(image_undistorted, undistorted_points, color=(255, 0, 255))
+    # prepare points
+    points = np.array([[100.5, 100.5],
+                       [50, 100],
+                       [70, 80],
+                       [100, 150]])
+    draw_points(image, points, color=(255, 0, 255))
 
+    distorted_points = distort_points(points, maps)
+    draw_points(image_distorted, distorted_points, color=(255, 0, 255))
+
+    undistorted_points = undistort_points(distorted_points, maps)
+    draw_points(image_undistorted, undistorted_points, color=(255, 0, 255))
+
+    ##########################################################################
+    # store outputs to disk
+    ##########################################################################
+
+    cv2.imwrite("distorted_img_k={}_dx={}_dy={}.jpg".format(k, dx, dy), image_distorted)
 
     ##########################################################################
     # show images & points
