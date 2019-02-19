@@ -19,7 +19,7 @@ from torch.optim import lr_scheduler
 import torchvision
 from torchvision import datasets, models, transforms
 
-from distortion_dataset import DistortionDataset
+from distortion_dataset import DistortionDataset, distortion_params
 from undistort_layer import UndistortLayer
 
 
@@ -40,6 +40,11 @@ def count_parameters(model):
 class UndistortNet(nn.Module):
     def __init__(self):
         super(UndistortNet, self).__init__()
+        # create distortion parameter lists
+        self.ks = torch.tensor(distortion_params["ks"], dtype=torch.float, requires_grad=True)
+        self.dxs = torch.tensor(distortion_params["dxs"], dtype=torch.float, requires_grad=True)
+        self.dys = torch.tensor(distortion_params["dys"], dtype=torch.float, requires_grad=True)
+
         base_model = models.resnet50(pretrained=True)
         # truncate base model's fully-connected and avg pool layer
         modules = list(base_model.children())[:-2]
@@ -86,12 +91,12 @@ class UndistortNet(nn.Module):
         # linear output layers
         self.fc1 = nn.Linear(in_features=8192, out_features=1024)
         self.fc2 = nn.Linear(in_features=1024, out_features=1024)
-        # self.fc_k = nn.Linear(in_features=1024, out_features=21)
-        # self.fc_dx = nn.Linear(in_features=1024, out_features=21)
-        # self.fc_dy = nn.Linear(in_features=1024, out_features=21)
-        self.fc_k = nn.Linear(in_features=1024, out_features=1)
-        self.fc_dx = nn.Linear(in_features=1024, out_features=1)
-        self.fc_dy = nn.Linear(in_features=1024, out_features=1)
+        self.fc_k = nn.Linear(in_features=1024, out_features=101)
+        self.fc_dx = nn.Linear(in_features=1024, out_features=101)
+        self.fc_dy = nn.Linear(in_features=1024, out_features=101)
+        #self.fc_k = nn.Linear(in_features=1024, out_features=1)
+        #self.fc_dx = nn.Linear(in_features=1024, out_features=1)
+        #self.fc_dy = nn.Linear(in_features=1024, out_features=1)
 
     def forward(self, im_d):
         debug = False
@@ -190,33 +195,47 @@ class UndistortNet(nn.Module):
         x = self.dropout(x)
         # --------- FC k ---------
         k = self.fc_k(x)
-        #k = F.log_softmax(k, dim=1)
-        k = F.relu(k)
+        k = F.log_softmax(k, dim=1)
+        #k = F.relu(k)
         if debug: print("FC k: ", k.shape)
-        # # --------- FC dx ---------
-        # dx = self.fc_dx(x)
-        # #dx = F.log_softmax(dx, dim=1)
-        # dx = F.relu(dx)
-        # if debug: print("FC dx: ", dx.shape)
-        # # --------- FC dy ---------
-        # dy = self.fc_dy(x)
-        # #dy = F.log_softmax(dy, dim=1)
-        # dy = F.relu(dy)
-        # if debug: print("FC dy: ", dy.shape)
+        # --------- FC dx ---------
+        dx = self.fc_dx(x)
+        dx = F.log_softmax(dx, dim=1)
+        #dx = F.relu(dx)
+        if debug: print("FC dx: ", dx.shape)
+        # --------- FC dy ---------
+        dy = self.fc_dy(x)
+        dy = F.log_softmax(dy, dim=1)
+        #dy = F.relu(dy)
+        if debug: print("FC dy: ", dy.shape)
+
+        # convert parameter probabilities into parameters
+        k_idx = torch.argmax(k, dim=1).cpu()
+        dx_idx = torch.argmax(dx, dim=1).cpu()
+        dy_idx = torch.argmax(dy, dim=1).cpu()
+        k = torch.index_select(input=self.ks, dim=0, index=k_idx).view(-1, 1).clone().detach().requires_grad_(True)
+        dx = torch.index_select(input=self.dxs, dim=0, index=dx_idx).view(-1, 1).clone().detach().requires_grad_(True)
+        dy = torch.index_select(input=self.dys, dim=0, index=dy_idx).view(-1, 1).clone().detach().requires_grad_(True)
+
+        #dx_idx = torch.argmax(dx, dim=1)
+        #dy_idx = torch.argmax(dy, dim=1)
+        #k = torch.tensor(self.ks[k].view(-1, 1), requires_grad=True)
+        #dx = torch.tensor(self.dxs[dx_idx].view(-1, 1), requires_grad=True)
+        #dy = torch.tensor(self.dys[dy_idx].view(-1, 1), requires_grad=True)
 
         # move output values to CPU
         im_d = im_d.cpu()
         k = k.cpu()
-        #dx = dx.cpu()
-        #dy = dy.cpu()
+        dx = dx.cpu()
+        dy = dy.cpu()
 
         # limit ranges
-        k = -k-0.001
+        #k = -k-0.001
         #k = -1*torch.clamp(k, min=0.001, max=0.4)  # k will be in [-0.4 .. 0.001]
         #dx = torch.clamp(dx, min=0, max=100)-50  # dx will be in [-50 .. 50]
         #dy = torch.clamp(dy, min=0, max=100)-50  # dy will be in [-50 .. 50]
-        dx = torch.zeros(k.shape, dtype=torch.float)
-        dy = torch.zeros(k.shape, dtype=torch.float)
+        #dx = torch.zeros(k.shape, dtype=torch.float)
+        #dy = torch.zeros(k.shape, dtype=torch.float)
 
         # undistort input image with estimated parameters
         print("k_pred:", k)

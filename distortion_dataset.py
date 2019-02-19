@@ -61,7 +61,12 @@ def _convert_to_opencv(image):
 #     dys_c = ((dys+50)/5).astype(np.int)
 #     return ks_c, dxs_c, dys_c
 
-
+# contains the possible distortion parameters as numpy array and torch tensor
+distortion_params = {
+    "ks": np.linspace(-0.4, -0.01, 101),
+    "dxs": np.linspace(-50, 50, 101),
+    "dys": np.linspace(-50, 50, 101),
+}
 
 class DistortionDataset(torch.utils.data.Dataset):
     def __init__(self, root_dir):
@@ -71,10 +76,6 @@ class DistortionDataset(torch.utils.data.Dataset):
         for wnid in wnids:
             image_path_wnid = glob.glob(os.path.join(self.root_dir, wnid, "*.jpg"))
             self.image_paths.extend(image_path_wnid)
-        # possible distortion parameters
-        #self.ks = np.linspace(-0.4, -0.001, 100)
-        #self.dxs = np.linspace(-50, 50, 100)
-        #self.dys = np.linspace(-50, 50, 100)
         # image size (square)
         self.image_size = 256
 
@@ -97,9 +98,12 @@ class DistortionDataset(torch.utils.data.Dataset):
         image = _convert_to_opencv(image)
 
         # sample randomly from possible distortion parameters
-        k = -0.4 * np.random.rand() - 0.01  # [-0.4 .. -0.01]
-        dx = 0 #100 * np.random.rand() - 50  # [-50 .. 50]
-        dy = 0 #100 * np.random.rand() - 50  # [-50 .. 50]
+        #k = -0.4 * np.random.rand() - 0.01  # [-0.4 .. -0.01]
+        #dx = 0 #100 * np.random.rand() - 50  # [-50 .. 50]
+        #dy = 0 #100 * np.random.rand() - 50  # [-50 .. 50]
+        k = np.random.choice(distortion_params["ks"])
+        dx = np.random.choice(distortion_params["dxs"])
+        dy = np.random.choice(distortion_params["dys"])
 
         # distort image with sampled distortion parameters
         maps = compute_maps(self.image_size, self.image_size, k, dx, dy)
@@ -111,9 +115,9 @@ class DistortionDataset(torch.utils.data.Dataset):
             self.image_size, maps, dx, dy)
 
         # convert to pyTorch compatible formats
-        k_c = torch.tensor(k, dtype=torch.float32)
-        dx_c = torch.tensor(dx, dtype=torch.float32)
-        dy_c = torch.tensor(dy, dtype=torch.float32)
+        k = torch.tensor(k, dtype=torch.float32)
+        dx = torch.tensor(dx, dtype=torch.float32)
+        dy = torch.tensor(dy, dtype=torch.float32)
         image_distorted = _convert_to_pil(image_distorted)
         image_undistorted = _convert_to_pil(image_undistorted)
         image_distorted_cropped = _convert_to_pil(image_distorted_cropped)
@@ -132,6 +136,6 @@ class DistortionDataset(torch.utils.data.Dataset):
         image_undistorted = normalize(image_undistorted)
         image_distorted_cropped = normalize(image_distorted_cropped)
 
-        data = (image_distorted, image_distorted_cropped, image_undistorted, k_c, dx_c, dy_c)
+        data = (image_distorted, image_distorted_cropped, image_undistorted, k, dx, dy)
 
         return data
