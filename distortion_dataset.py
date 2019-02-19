@@ -24,43 +24,6 @@ def _convert_to_opencv(image):
     return image
 
 
-# def classes_to_parameters(ks_c, dxs_c, dys_c):
-#     """Transform class indices to distortion parameter values.
-#
-#     Args:
-#         ks_c (ints): class index for k, e.g. {0, 1, ..., 21}
-#         dxs_c (ints): class index for dx, e.g. {0, 1, ..., 21}
-#         dys_c (ints): class index for for dy, e.g. {0, 1, ..., 21}
-#
-#     Returns:
-#         ks (float): Actual value for k, e.g. [0, -0.02, ..., -0.4]
-#         dx (float): Actual value for dx, e.g. [-50, -45, ..., 50]
-#         dy (float):Actual value for dy, e.g. [-50, -45, ..., 50]
-#     """
-#     ks = -20e-3*ks_c
-#     dxs = 5*dxs_c-50
-#     dys = 5*dys_c-50
-#     return ks, dxs, dys
-#
-#
-# def parameters_to_classes(ks, dxs, dys):
-#     """Transform class indices to distortion parameter values.
-#
-#     Args:
-#         ks (float): Actual value for k, e.g. [0, -0.02, ..., -0.4]
-#         dx (float): Actual value for dx, e.g. [-50, -45, ..., 50]
-#         dy (float):Actual value for dy, e.g. [-50, -45, ..., 50]
-#
-#     Returns:
-#         ks_c (ints): class index for k, e.g. {0, 1, ..., 21}
-#         dxs_c (ints): class index for dx, e.g. {0, 1, ..., 21}
-#         dys_c (ints): class index for for dy, e.g. {0, 1, ..., 21}
-#     """
-#     ks_c = (ks/-20e-3).astype(np.int)
-#     dxs_c = ((dxs+50)/5).astype(np.int)
-#     dys_c = ((dys+50)/5).astype(np.int)
-#     return ks_c, dxs_c, dys_c
-
 # contains the possible distortion parameters as numpy array and torch tensor
 distortion_params = {
     "ks": np.linspace(-0.4, -0.01, 101),

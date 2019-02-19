@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-for f in *.tar
-do
-  mkdir "${f%%.*}" && tar -xf "$f" -C "${f%%.*}"
-done

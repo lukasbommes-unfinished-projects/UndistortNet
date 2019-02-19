@@ -342,7 +342,7 @@ if __name__ == "__main__":
                "evaluate_model_every_steps should be a multiple of print_log_every_steps"
         save_model_ckpt_every_steps = 1000
 
-        lowest_loss = 9999.99
+        #lowest_loss = 9999.99
         t0 = time.time()
         validated = False
 

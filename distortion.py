@@ -260,6 +260,7 @@ def square_center_crop(image, size=None):
     return image[ymin:ymax, xmin:xmax, :]
 
 
+# TESTING
 if __name__ == "__main__":
 
     dx=50

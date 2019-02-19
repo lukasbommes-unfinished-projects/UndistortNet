@@ -53,7 +53,6 @@ class UndistortLayer(nn.Module):
         dy = dy.squeeze().expand([c, h, w, -1]).permute(3, 0, 1, 2)
 
         # normalize coordinates to range [-0.5..0.5 x -0.5..0.5]
-        #print(dx.shape)
         xur = (xu - dx)/w - 1/2
         yur = (yu - dy)/h - 1/2
         # convert to polar
@@ -97,9 +96,8 @@ class UndistortLayer(nn.Module):
         return im_ud
 
 
+# TESTING
 if __name__ == "__main__":
-
-
     undistort_layer = UndistortLayer()
     input_img = cv2.imread("distorted_img_k=-0.4_dx=50_dy=-10.jpg")
     h, w, c = input_img.shape
