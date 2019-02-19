@@ -28,6 +28,7 @@ from undistort_layer import UndistortLayer
 # - try different losses
 # - look at network output (what is it predicting? Visualize prediction results.)
 # - play around with optimizer params
+# - crop and translate input image and undistorted image randomly (simply add it at the end of the pipeline)
 
 np.random.seed(0)
 
@@ -59,15 +60,15 @@ class UndistortNet(nn.Module):
 
         # distortion parameter estimation network
         self.dpen_conv2d_1 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1, stride=1)
-        self.dpen_conv2d_2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1, stride=2)
+        self.dpen_conv2d_2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1, stride=1)
         self.dpen_conv2d_3 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1, stride=1)
-        self.dpen_conv2d_4 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, padding=1, stride=2)
+        self.dpen_conv2d_4 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, padding=1, stride=1)
         self.dpen_conv2d_5 = nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, padding=1, stride=1)
-        self.dpen_conv2d_6 = nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, padding=1, stride=2)
+        self.dpen_conv2d_6 = nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, padding=1, stride=1)
         self.dpen_conv2d_7 = nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, padding=1, stride=1)
-        self.dpen_conv2d_8 = nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1, stride=2)
-        self.dpen_conv2d_9 = nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1, stride=1)
-        self.dpen_conv2d_10 = nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1, stride=2)
+        self.dpen_conv2d_8 = nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1, stride=1)
+        #self.dpen_conv2d_9 = nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1, stride=1)
+        #self.dpen_conv2d_10 = nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1, stride=1)
         self.dpen_pooling2d = nn.AvgPool2d(kernel_size=2, stride=2)
         self.dpen_batch_norm_1 = nn.BatchNorm2d(num_features=64)
         self.dpen_batch_norm_2 = nn.BatchNorm2d(num_features=64)
@@ -77,12 +78,12 @@ class UndistortNet(nn.Module):
         self.dpen_batch_norm_6 = nn.BatchNorm2d(num_features=256)
         self.dpen_batch_norm_7 = nn.BatchNorm2d(num_features=512)
         self.dpen_batch_norm_8 = nn.BatchNorm2d(num_features=512)
-        self.dpen_batch_norm_9 = nn.BatchNorm2d(num_features=512)
-        self.dpen_batch_norm_10 = nn.BatchNorm2d(num_features=512)
+        #self.dpen_batch_norm_9 = nn.BatchNorm2d(num_features=512)
+        #self.dpen_batch_norm_10 = nn.BatchNorm2d(num_features=512)
         self.dropout = nn.Dropout(p=0.5)
 
         # linear output layers
-        self.fc1 = nn.Linear(in_features=8192, out_features=1024)
+        self.fc1 = nn.Linear(in_features=131072, out_features=1024)
         self.fc2 = nn.Linear(in_features=1024, out_features=1024)
         self.fc_k = nn.Linear(in_features=1024, out_features=1)
         self.fc_dx = nn.Linear(in_features=1024, out_features=1)
@@ -125,6 +126,8 @@ class UndistortNet(nn.Module):
         x = self.dpen_conv2d_2(x)
         if debug: print("conv 2:", x.shape)
         x = self.dpen_batch_norm_2(x)
+        x = self.dpen_pooling2d(x)
+        if debug: print("pool 1:", x.shape)
         x = F.relu(x)
         # --------- L3 (Conv 3) ---------
         x = self.dpen_conv2d_3(x)
@@ -135,6 +138,8 @@ class UndistortNet(nn.Module):
         x = self.dpen_conv2d_4(x)
         if debug: print("conv 4:", x.shape)
         x = self.dpen_batch_norm_4(x)
+        x = self.dpen_pooling2d(x)
+        if debug: print("pool 2:", x.shape)
         x = F.relu(x)
         # --------- L5 (Conv 5) ---------
         x = self.dpen_conv2d_5(x)
@@ -145,6 +150,8 @@ class UndistortNet(nn.Module):
         x = self.dpen_conv2d_6(x)
         if debug: print("conv 6:", x.shape)
         x = self.dpen_batch_norm_6(x)
+        x = self.dpen_pooling2d(x)
+        if debug: print("pool 3:", x.shape)
         x = F.relu(x)
         # --------- L7 (Conv 7) ---------
         x = self.dpen_conv2d_7(x)
@@ -155,19 +162,21 @@ class UndistortNet(nn.Module):
         x = self.dpen_conv2d_8(x)
         if debug: print("conv 8:", x.shape)
         x = self.dpen_batch_norm_8(x)
-        # x = F.relu(x)
-        # --------- L9 (Conv 9) ---------
-        x = self.dpen_conv2d_9(x)
-        if debug: print("conv 9:", x.shape)
-        x = self.dpen_batch_norm_9(x)
-        x = F.relu(x)
-        # --------- L10 (Conv 10) ---------
-        x = self.dpen_conv2d_10(x)
-        if debug: print("conv 10:", x.shape)
-        x = self.dpen_batch_norm_10(x)
-        x = F.relu(x)
         x = self.dpen_pooling2d(x)
-        if debug: print("pooling:", x.shape)
+        if debug: print("pool 4:", x.shape)
+        x = F.relu(x)
+        # # --------- L9 (Conv 9) ---------
+        # x = self.dpen_conv2d_9(x)
+        # if debug: print("conv 9:", x.shape)
+        # x = self.dpen_batch_norm_9(x)
+        # x = F.relu(x)
+        # # --------- L10 (Conv 10) ---------
+        # x = self.dpen_conv2d_10(x)
+        # if debug: print("conv 10:", x.shape)
+        # x = self.dpen_batch_norm_10(x)
+        # x = F.relu(x)
+        # x = self.dpen_pooling2d(x)
+        # if debug: print("pooling:", x.shape)
         x = self.dropout(x)
 
         # linear output layers
@@ -184,39 +193,20 @@ class UndistortNet(nn.Module):
         x = self.dropout(x)
         # --------- FC k ---------
         k = self.fc_k(x)
-        #k = F.log_softmax(k, dim=1)
-        k = F.relu(k)
+        k = -0.4 * F.sigmoid(k) - 0.001
         if debug: print("FC k: ", k.shape)
         # --------- FC dx ---------
         dx = self.fc_dx(x)
-        #dx = F.log_softmax(dx, dim=1)
-        dx = F.relu(dx)
+        dx = torch.tanh(dx)*50
         if debug: print("FC dx: ", dx.shape)
         # --------- FC dy ---------
         dy = self.fc_dy(x)
-        #dy = F.log_softmax(dy, dim=1)
-        dy = F.relu(dy)
+        dy = torch.tanh(dy)*50
         if debug: print("FC dy: ", dy.shape)
 
-        # convert parameter probabilities into parameters
-        #k_idx = torch.argmax(k, dim=1).cpu()
-        #dx_idx = torch.argmax(dx, dim=1).cpu()
-        #dy_idx = torch.argmax(dy, dim=1).cpu()
-        #k = torch.index_select(input=self.ks, dim=0, index=k_idx).view(-1, 1).clone().detach().requires_grad_(True)
-        #dx = torch.index_select(input=self.dxs, dim=0, index=dx_idx).view(-1, 1).clone().detach().requires_grad_(True)
-        #dy = torch.index_select(input=self.dys, dim=0, index=dy_idx).view(-1, 1).clone().detach().requires_grad_(True)
-
-        # limit ranges
-        k = -k-0.001
-        #k = -1*torch.clamp(k, min=0.001, max=0.4)  # k will be in [-0.4 .. 0.001]
-        #dx = torch.clamp(dx, min=0, max=100)-50  # dx will be in [-50 .. 50]
-        #dy = torch.clamp(dy, min=0, max=100)-50  # dy will be in [-50 .. 50]
-        #dx = torch.zeros(k.shape, dtype=torch.float)
-        #dy = torch.zeros(k.shape, dtype=torch.float)
-
-        #print("k_pred", k.view(-1))
-        #print("dx_pred", dx.view(-1))
-        #print("dy_pred", dy.view(-1))
+        print("k_pred", k.view(-1))
+        print("dx_pred", dx.view(-1))
+        print("dy_pred", dy.view(-1))
 
         # undistort input image with estimated parameters
         im_ud = self.undistort_layer(im_d, k, dx, dy)
@@ -360,9 +350,10 @@ if __name__ == "__main__":
                 im_d, im_d_c, im_ud = im_d.to(device), im_d_c.to(device), im_ud.to(device)
                 k, dx, dy = k.to(device), dx.to(device), dy.to(device)
 
-                #print("k_actual", k)
-                #print("dx_actual", dx)
-                #print("dy_actual", dy)
+                # debug only
+                print("k_actual", k)
+                print("dx_actual", dx)
+                print("dy_actual", dy)
 
                 optimizer.zero_grad()
 
