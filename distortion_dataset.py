@@ -24,13 +24,6 @@ def _convert_to_opencv(image):
     return image
 
 
-# contains the possible distortion parameters as numpy array and torch tensor
-distortion_params = {
-    "ks": np.linspace(-0.4, -0.01, 101),
-    "dxs": np.linspace(-50, 50, 101),
-    "dys": np.linspace(-50, 50, 101),
-}
-
 class DistortionDataset(torch.utils.data.Dataset):
     def __init__(self, root_dir):
         self.root_dir = root_dir
@@ -61,12 +54,9 @@ class DistortionDataset(torch.utils.data.Dataset):
         image = _convert_to_opencv(image)
 
         # sample randomly from possible distortion parameters
-        #k = -0.4 * np.random.rand() - 0.01  # [-0.4 .. -0.01]
-        #dx = 0 #100 * np.random.rand() - 50  # [-50 .. 50]
-        #dy = 0 #100 * np.random.rand() - 50  # [-50 .. 50]
-        k = np.random.choice(distortion_params["ks"])
-        dx = np.random.choice(distortion_params["dxs"])
-        dy = np.random.choice(distortion_params["dys"])
+        k = -0.39 * np.random.rand() - 0.01  # (-0.4 .. -0.01]
+        dx = 100 * np.random.rand() - 50  # [-50 .. 50)
+        dy = 100 * np.random.rand() - 50  # [-50 .. 50)
 
         # distort image with sampled distortion parameters
         maps = compute_maps(self.image_size, self.image_size, k, dx, dy)

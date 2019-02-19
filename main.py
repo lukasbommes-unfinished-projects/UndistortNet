@@ -19,19 +19,17 @@ from torch.optim import lr_scheduler
 import torchvision
 from torchvision import datasets, models, transforms
 
-from distortion_dataset import DistortionDataset, distortion_params
+from distortion_dataset import DistortionDataset#, distortion_params
 from undistort_layer import UndistortLayer
 
 
 # Experiments:
-# - Try to do normal regression instead of binned outputs
 # - change network architecture
 # - try different losses
 # - look at network output (what is it predicting? Visualize prediction results.)
 # - play around with optimizer params
-# - try end-to-end training with undistort layer
 
-#np.random.seed(0)
+np.random.seed(0)
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -40,11 +38,6 @@ def count_parameters(model):
 class UndistortNet(nn.Module):
     def __init__(self):
         super(UndistortNet, self).__init__()
-        # create distortion parameter lists
-        self.ks = torch.tensor(distortion_params["ks"], dtype=torch.float, requires_grad=True)
-        self.dxs = torch.tensor(distortion_params["dxs"], dtype=torch.float, requires_grad=True)
-        self.dys = torch.tensor(distortion_params["dys"], dtype=torch.float, requires_grad=True)
-
         base_model = models.resnet50(pretrained=True)
         # truncate base model's fully-connected and avg pool layer
         modules = list(base_model.children())[:-2]
@@ -91,12 +84,9 @@ class UndistortNet(nn.Module):
         # linear output layers
         self.fc1 = nn.Linear(in_features=8192, out_features=1024)
         self.fc2 = nn.Linear(in_features=1024, out_features=1024)
-        self.fc_k = nn.Linear(in_features=1024, out_features=101)
-        self.fc_dx = nn.Linear(in_features=1024, out_features=101)
-        self.fc_dy = nn.Linear(in_features=1024, out_features=101)
-        #self.fc_k = nn.Linear(in_features=1024, out_features=1)
-        #self.fc_dx = nn.Linear(in_features=1024, out_features=1)
-        #self.fc_dy = nn.Linear(in_features=1024, out_features=1)
+        self.fc_k = nn.Linear(in_features=1024, out_features=1)
+        self.fc_dx = nn.Linear(in_features=1024, out_features=1)
+        self.fc_dy = nn.Linear(in_features=1024, out_features=1)
 
     def forward(self, im_d):
         if debug: print("input: ", im_d.shape)
@@ -194,41 +184,39 @@ class UndistortNet(nn.Module):
         x = self.dropout(x)
         # --------- FC k ---------
         k = self.fc_k(x)
-        k = F.log_softmax(k, dim=1)
-        #k = F.relu(k)
+        #k = F.log_softmax(k, dim=1)
+        k = F.relu(k)
         if debug: print("FC k: ", k.shape)
         # --------- FC dx ---------
         dx = self.fc_dx(x)
-        dx = F.log_softmax(dx, dim=1)
-        #dx = F.relu(dx)
+        #dx = F.log_softmax(dx, dim=1)
+        dx = F.relu(dx)
         if debug: print("FC dx: ", dx.shape)
         # --------- FC dy ---------
         dy = self.fc_dy(x)
-        dy = F.log_softmax(dy, dim=1)
-        #dy = F.relu(dy)
+        #dy = F.log_softmax(dy, dim=1)
+        dy = F.relu(dy)
         if debug: print("FC dy: ", dy.shape)
 
         # convert parameter probabilities into parameters
-        k_idx = torch.argmax(k, dim=1).cpu()
-        dx_idx = torch.argmax(dx, dim=1).cpu()
-        dy_idx = torch.argmax(dy, dim=1).cpu()
-        k = torch.index_select(input=self.ks, dim=0, index=k_idx).view(-1, 1).clone().detach().requires_grad_(True)
-        dx = torch.index_select(input=self.dxs, dim=0, index=dx_idx).view(-1, 1).clone().detach().requires_grad_(True)
-        dy = torch.index_select(input=self.dys, dim=0, index=dy_idx).view(-1, 1).clone().detach().requires_grad_(True)
-
-        #dx_idx = torch.argmax(dx, dim=1)
-        #dy_idx = torch.argmax(dy, dim=1)
-        #k = torch.tensor(self.ks[k].view(-1, 1), requires_grad=True)
-        #dx = torch.tensor(self.dxs[dx_idx].view(-1, 1), requires_grad=True)
-        #dy = torch.tensor(self.dys[dy_idx].view(-1, 1), requires_grad=True)
+        #k_idx = torch.argmax(k, dim=1).cpu()
+        #dx_idx = torch.argmax(dx, dim=1).cpu()
+        #dy_idx = torch.argmax(dy, dim=1).cpu()
+        #k = torch.index_select(input=self.ks, dim=0, index=k_idx).view(-1, 1).clone().detach().requires_grad_(True)
+        #dx = torch.index_select(input=self.dxs, dim=0, index=dx_idx).view(-1, 1).clone().detach().requires_grad_(True)
+        #dy = torch.index_select(input=self.dys, dim=0, index=dy_idx).view(-1, 1).clone().detach().requires_grad_(True)
 
         # limit ranges
-        #k = -k-0.001
+        k = -k-0.001
         #k = -1*torch.clamp(k, min=0.001, max=0.4)  # k will be in [-0.4 .. 0.001]
         #dx = torch.clamp(dx, min=0, max=100)-50  # dx will be in [-50 .. 50]
         #dy = torch.clamp(dy, min=0, max=100)-50  # dy will be in [-50 .. 50]
         #dx = torch.zeros(k.shape, dtype=torch.float)
         #dy = torch.zeros(k.shape, dtype=torch.float)
+
+        #print("k_pred", k.view(-1))
+        #print("dx_pred", dx.view(-1))
+        #print("dy_pred", dy.view(-1))
 
         # undistort input image with estimated parameters
         im_ud = self.undistort_layer(im_d, k, dx, dy)
@@ -271,8 +259,10 @@ def visualize_data(dataloaders, num_images=3, phase='train'):
                 return
 
 
-def evaluate_model(val_data_loader, val_dataset_len):
-    model.eval()
+def evaluate_model(model, val_data_loader, val_dataset_len):
+    was_training = model.training
+    if was_training:
+        model.eval()
     running_loss = 0.0
     for data in tqdm(val_data_loader, desc="val"):
         im_d, im_d_c, im_ud, k, dx, dy = data
@@ -284,6 +274,8 @@ def evaluate_model(val_data_loader, val_dataset_len):
             loss = loss_criterion(im_ud_pred, im_ud)
         running_loss += loss.item() * im_d.size(0)
     val_loss = running_loss / val_dataset_len
+    if was_training:
+        model.train()
     return val_loss
 
 
@@ -315,8 +307,8 @@ if __name__ == "__main__":
     loss_criterion = nn.MSELoss(reduction="sum")
 
     # optimizer, learning rate, etc.
-    optimizer = optim.Adam(model.parameters(), lr=0.001)  # 1e-3
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)  # 1e-3
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
 
     # load data
     data_dir = 'dataset'
@@ -330,35 +322,36 @@ if __name__ == "__main__":
     print("Number of training images: {}".format(len(image_datasets["train"])))
     print("Number of validation images: {}".format(len(image_datasets["val"])))
 
-    #visualize_data(dataloaders)
+#visualize_data(dataloaders)
 
-    if True:
+    # train network
+    num_epochs = 10
+    print_log_every_steps = 10  # None to disable
+    evaluate_model_every_steps = 100  # None to disable
+    save_model_ckpt_every_steps = 1000  # None to disable
+    save_best_model = True  # keep the best model
 
-        # train network
-        num_epochs = 10
-        print_log_every_steps = 10
-        evaluate_model_every_steps = 20
+    if evaluate_model_every_steps:
         assert evaluate_model_every_steps % print_log_every_steps == 0, \
                "evaluate_model_every_steps should be a multiple of print_log_every_steps"
-        save_model_ckpt_every_steps = 1000
 
-        #lowest_loss = 9999.99
-        t0 = time.time()
-        validated = False
+    t0 = time.time()
+    validated = False
 
-        win = vis.line([0], [-1], opts=dict(title="Losses", xlabel="Step", ylabel="Loss"))
+    win = vis.line([0], [-1], opts=dict(title="Losses", xlabel="Step", ylabel="Loss"))
+
+    try:
 
         for epoch in range(num_epochs):
             step = 0
             num_steps_in_epoch = int(np.ceil(len(image_datasets["train"]) / dataloaders["train"].batch_size))
             t0_epoch = time.time()
+            val_loss = float("inf")
+            val_loss_lowest = float("inf")
             print("--------------------")
             print("Epoch {}/{}".format(epoch+1, num_epochs))
 
-            ###################################################################
-            # training
-            ###################################################################
-            exp_lr_scheduler.step()
+            scheduler.step()
             model.train()
 
             # iterate over data
@@ -366,6 +359,10 @@ if __name__ == "__main__":
                 im_d, im_d_c, im_ud, k, dx, dy = data
                 im_d, im_d_c, im_ud = im_d.to(device), im_d_c.to(device), im_ud.to(device)
                 k, dx, dy = k.to(device), dx.to(device), dy.to(device)
+
+                #print("k_actual", k)
+                #print("dx_actual", dx)
+                #print("dy_actual", dy)
 
                 optimizer.zero_grad()
 
@@ -381,53 +378,63 @@ if __name__ == "__main__":
                     optimizer.step()
 
                 # evaluate model every "evaluate_model_every_steps" steps
-                if step > 0 and step % evaluate_model_every_steps == 0:
-                    print("Running model evaluation...")
-                    val_loss = evaluate_model(dataloaders["val"], len(image_datasets["val"]))
-                    validated = True
+                if print_log_every_steps and evaluate_model_every_steps:
+                    if step > 0 and step % evaluate_model_every_steps == 0:
+                        print("Running model evaluation...")
+                        val_loss = evaluate_model(model, dataloaders["val"], len(image_datasets["val"]))
+                        validated = True
 
                 # report every "print_log_every_steps" steps
-                if step % print_log_every_steps == 0:
-                    if validated:
-                        validated = False
-                        disp = [epoch+1, num_epochs, step+1, num_steps_in_epoch, time.time() - t0_epoch, loss.item(), val_loss]
-                        print("epoch: {:02d}/{:02d}, step: {:06d}/{:06d}, elapsed: {:011.3f} s, train loss: {:.3f}, val loss: {:.3f}".format(*disp))
-                        vis.line([val_loss], [num_steps_in_epoch * epoch + step], win=win, name='val', update='append')
-                    else:
-                        disp = [epoch+1, num_epochs, step+1, num_steps_in_epoch, time.time() - t0_epoch, loss.item()]
-                        print("epoch: {:02d}/{:02d}, step: {:06d}/{:06d}, elapsed: {:011.3f} s, train loss: {:.3f}, val loss: ---".format(*disp))
-                        vis.line([loss.item()], [num_steps_in_epoch * epoch + step], win=win, name='train', update='append')
+                if print_log_every_steps:
+                    if step % print_log_every_steps == 0:
+                        if validated:
+                            validated = False
+                            disp = [epoch+1, num_epochs, step+1, num_steps_in_epoch, time.time() - t0_epoch, loss.item(), val_loss]
+                            print("epoch: {:02d}/{:02d}, step: {:06d}/{:06d}, elapsed: {:011.3f} s, train loss: {:.3f}, val loss: {:.3f}".format(*disp))
+                            vis.line([val_loss], [num_steps_in_epoch * epoch + step], win=win, name='val', update='append')
+                        else:
+                            disp = [epoch+1, num_epochs, step+1, num_steps_in_epoch, time.time() - t0_epoch, loss.item()]
+                            print("epoch: {:02d}/{:02d}, step: {:06d}/{:06d}, elapsed: {:011.3f} s, train loss: {:.3f}, val loss: ---".format(*disp))
+                            vis.line([loss.item()], [num_steps_in_epoch * epoch + step], win=win, name='train', update='append')
 
                 # save checkpoint every "save_model_ckpt_every_steps" steps
-                if step > 0 and step % save_model_ckpt_every_steps == 0:
-                    checkpoint = {
-                        "epoch": epoch,
-                        "step": step,
-                        'model_state_dict': model.state_dict(),
-                        'optimizer_state_dict': optimizer.state_dict(),
-                        'train_loss': loss
-                    }
-                    torch.save(checkpoint, "model/checkpoints/checkpoint_epoch_{}_step_{}.tar".format(epoch, step))
-                    print("Saved checkpoint.")
+                if save_model_ckpt_every_steps:
+                    if step > 0 and step % save_model_ckpt_every_steps == 0:
+                        checkpoint = {
+                            "epoch": epoch,
+                            "step": step,
+                            'model_state_dict': model.state_dict(),
+                            'optimizer_state_dict': optimizer.state_dict(),
+                            'train_loss': loss
+                        }
+                        torch.save(checkpoint, "model/checkpoints/checkpoint_epoch_{}_step_{}.tar".format(epoch, step))
+                        print("Saved checkpoint.")
+
+
+                # save model checkpoint if validation loss is smaller than in previous run
+                if save_best_model and evaluate_model_every_steps:
+                    if step > 0 and val_loss < val_loss_lowest:
+                        val_loss_lowest = val_loss
+                        checkpoint = {
+                            "epoch": epoch,
+                            "step": step,
+                            'model_state_dict': model.state_dict(),
+                            'optimizer_state_dict': optimizer.state_dict(),
+                            'train_loss': loss
+                        }
+                        torch.save(checkpoint, "model/checkpoints/best_model.tar".format(epoch, step))
+                        print("Saved model as new best model.")
 
                 step += 1
 
-            ###################################################################
-            # testing
-            ###################################################################
-
-
-
-        #
-        #         # safe separate checkpoint if model is better than in previous epoch
-        #         if phase == "val" and epoch_loss < lowest_loss:
-        #             lowest_loss = epoch_loss
-        #             torch.save(checkpoint, "model/checkpoints/best_model.tar")
-        #             print("Saved model in epoch {} as new best model.".format(epoch))
-        #
-        # time_elapsed = time.time() - t0
-        # print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
-        # print('Lowest validation loss: {:4f}'.format(lowest_loss))
-        #
-        # # load the best model
-        # model.load_state_dict(best_model_weights)
+    # save model when user hits CRTL + C then exit
+    except KeyboardInterrupt:
+        checkpoint = {
+            "epoch": epoch,
+            "step": step,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'train_loss': loss
+        }
+        torch.save(checkpoint, "model/checkpoints/model_at_exit.tar".format(epoch, step))
+        print("Saving last state before exiting...")
