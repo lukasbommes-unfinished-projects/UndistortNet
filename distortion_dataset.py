@@ -89,6 +89,9 @@ class DistortionDataset(torch.utils.data.Dataset):
         image_undistorted = normalize(image_undistorted)
         image_distorted_cropped = normalize(image_distorted_cropped)
 
+        # TODO:
+        # random crops from image_distorted and image_udistorted (make sure they are identical)
+
         data = (image_distorted, image_distorted_cropped, image_undistorted, k, dx, dy)
 
         return data

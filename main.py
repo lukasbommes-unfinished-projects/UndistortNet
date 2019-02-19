@@ -22,6 +22,8 @@ from torchvision import datasets, models, transforms
 from distortion_dataset import DistortionDataset#, distortion_params
 from undistort_layer import UndistortLayer
 
+# TODO:
+# - log losses to csv file for later plotting
 
 # Experiments:
 # - change network architecture
@@ -39,7 +41,7 @@ def count_parameters(model):
 class UndistortNet(nn.Module):
     def __init__(self):
         super(UndistortNet, self).__init__()
-        base_model = models.resnet50(pretrained=True)
+        base_model = models.resnet50(pretrained=True)  # try ResNet 101
         # truncate base model's fully-connected and avg pool layer
         modules = list(base_model.children())[:-2]
         self.base_model = nn.Sequential(*modules)
@@ -67,8 +69,6 @@ class UndistortNet(nn.Module):
         self.dpen_conv2d_6 = nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, padding=1, stride=1)
         self.dpen_conv2d_7 = nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, padding=1, stride=1)
         self.dpen_conv2d_8 = nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1, stride=1)
-        #self.dpen_conv2d_9 = nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1, stride=1)
-        #self.dpen_conv2d_10 = nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1, stride=1)
         self.dpen_pooling2d = nn.AvgPool2d(kernel_size=2, stride=2)
         self.dpen_batch_norm_1 = nn.BatchNorm2d(num_features=64)
         self.dpen_batch_norm_2 = nn.BatchNorm2d(num_features=64)
@@ -78,8 +78,6 @@ class UndistortNet(nn.Module):
         self.dpen_batch_norm_6 = nn.BatchNorm2d(num_features=256)
         self.dpen_batch_norm_7 = nn.BatchNorm2d(num_features=512)
         self.dpen_batch_norm_8 = nn.BatchNorm2d(num_features=512)
-        #self.dpen_batch_norm_9 = nn.BatchNorm2d(num_features=512)
-        #self.dpen_batch_norm_10 = nn.BatchNorm2d(num_features=512)
         self.dropout = nn.Dropout(p=0.5)
 
         # linear output layers
@@ -165,18 +163,6 @@ class UndistortNet(nn.Module):
         x = self.dpen_pooling2d(x)
         if debug: print("pool 4:", x.shape)
         x = F.relu(x)
-        # # --------- L9 (Conv 9) ---------
-        # x = self.dpen_conv2d_9(x)
-        # if debug: print("conv 9:", x.shape)
-        # x = self.dpen_batch_norm_9(x)
-        # x = F.relu(x)
-        # # --------- L10 (Conv 10) ---------
-        # x = self.dpen_conv2d_10(x)
-        # if debug: print("conv 10:", x.shape)
-        # x = self.dpen_batch_norm_10(x)
-        # x = F.relu(x)
-        # x = self.dpen_pooling2d(x)
-        # if debug: print("pooling:", x.shape)
         x = self.dropout(x)
 
         # linear output layers
