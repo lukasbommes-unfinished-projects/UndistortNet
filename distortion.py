@@ -8,14 +8,14 @@ def compute_maps(image_width, image_height, k=-0.4, dx=0, dy=0):
     Computes a tuple of four maps which can be used to distort or undistort an
     image or sets of points with the methods below. The maps have the following
     meaning:
-        maps[0] (d_map_x): Yields the undistorted x coordinate as
-            a function of the distorted coordinates: xu = ud_map_x(yd, xd)
-        maps[1] (d_map_y): Yields the undistorted y coordinate as
-            a function of the distorted coordinates: yu = ud_map_y(yd, xd)
-        maps[2] (ud_map_x): Yields the distorted x coordinate as
+        maps[0] (d_map_x): Yields the distorted x coordinate as
             a function of the undistorted coordinates: xd = d_map_x(yu, xu)
-        maps[3] (ud_map_y): Yields the distorted y coordinate as
-            a function of the undistorted coordinates: yd = d_map_y(yu, xu)
+        maps[1] (d_map_y): Yields the undistorted y coordinate as
+            a function of the distorted coordinates: yd = d_map_y(yu, xu)
+        maps[2] (ud_map_x): Yields the undistorted x coordinate as
+            a function of the distorted coordinates: xu = ud_map_x(yd, xd)
+        maps[3] (ud_map_y): Yields the undistorted y coordinate as
+            a function of the distorted coordinates: yu = ud_map_y(yd, xd)
 
     Args:
         image_width (int): Image width in pixels of the image for which the

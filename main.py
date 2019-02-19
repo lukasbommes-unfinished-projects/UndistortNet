@@ -99,7 +99,6 @@ class UndistortNet(nn.Module):
         #self.fc_dy = nn.Linear(in_features=1024, out_features=1)
 
     def forward(self, im_d):
-        debug = False
         if debug: print("input: ", im_d.shape)
 
         # 3 x 3 conv layer on raw input image
@@ -223,12 +222,6 @@ class UndistortNet(nn.Module):
         #dx = torch.tensor(self.dxs[dx_idx].view(-1, 1), requires_grad=True)
         #dy = torch.tensor(self.dys[dy_idx].view(-1, 1), requires_grad=True)
 
-        # move output values to CPU
-        im_d = im_d.cpu()
-        k = k.cpu()
-        dx = dx.cpu()
-        dy = dy.cpu()
-
         # limit ranges
         #k = -k-0.001
         #k = -1*torch.clamp(k, min=0.001, max=0.4)  # k will be in [-0.4 .. 0.001]
@@ -238,9 +231,7 @@ class UndistortNet(nn.Module):
         #dy = torch.zeros(k.shape, dtype=torch.float)
 
         # undistort input image with estimated parameters
-        print("k_pred:", k)
         im_ud = self.undistort_layer(im_d, k, dx, dy)
-        im_ud = im_ud.to(device)
 
         return im_ud
 
@@ -280,20 +271,42 @@ def visualize_data(dataloaders, num_images=3, phase='train'):
                 return
 
 
+def evaluate_model(val_data_loader, val_dataset_len):
+    model.eval()
+    running_loss = 0.0
+    for data in tqdm(val_data_loader, desc="val"):
+        im_d, im_d_c, im_ud, k, dx, dy = data
+        im_d, im_d_c, im_ud = im_d.to(device), im_d_c.to(device), im_ud.to(device)
+        k, dx, dy = k.to(device), dx.to(device), dy.to(device)
+        # forward pass
+        with torch.no_grad():
+            im_ud_pred = model(im_d)
+            loss = loss_criterion(im_ud_pred, im_ud)
+        running_loss += loss.item() * im_d.size(0)
+    val_loss = running_loss / val_dataset_len
+    return val_loss
+
+
 if __name__ == "__main__":
+
+    debug = False
 
     # for visualization
     vis = Visdom(server="http://undistort_net_visdom", port=8097)
     print("Visualizing network training via Visdom. Connect to http://localhost:8097 to view stats.")
 
     # model setup, training and validation
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    torch.cuda.empty_cache()
+    if torch.cuda.is_available():
+        device = torch.device("cuda:0")
+        num_devices = torch.cuda.device_count()
+        torch.cuda.empty_cache()
+    else:
+        raise NotImplementedError("Currently only GPU training is supported.")
 
     # network setup (run on both GPUs)
     model = UndistortNet()
-    model = torch.nn.DataParallel(model, device_ids=[0, 1])
-    print(model)
+    model = torch.nn.DataParallel(model)
+    if debug: print(model)
     model = model.to(device)
 
     print("Number of trainable parameters: {}".format(count_parameters(model)))
@@ -303,7 +316,7 @@ if __name__ == "__main__":
 
     # optimizer, learning rate, etc.
     optimizer = optim.Adam(model.parameters(), lr=0.001)  # 1e-3
-    #exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.1)
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
 
     # load data
     data_dir = 'dataset'
@@ -311,9 +324,11 @@ if __name__ == "__main__":
     def worker_init(worker_id):
         np.random.seed(worker_id)
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x],
-                   batch_size=64, shuffle=True, num_workers=8, worker_init_fn=worker_init)
+                   batch_size=32, shuffle=True, num_workers=8, worker_init_fn=worker_init)
                    for x in ['train', 'val']}
-    dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
+
+    print("Number of training images: {}".format(len(image_datasets["train"])))
+    print("Number of validation images: {}".format(len(image_datasets["val"])))
 
     #visualize_data(dataloaders)
 
@@ -321,89 +336,98 @@ if __name__ == "__main__":
 
         # train network
         num_epochs = 10
-        lowest_loss = 9999.99
+        print_log_every_steps = 10
+        evaluate_model_every_steps = 20
+        assert evaluate_model_every_steps % print_log_every_steps == 0, \
+               "evaluate_model_every_steps should be a multiple of print_log_every_steps"
+        save_model_ckpt_every_steps = 1000
 
+        lowest_loss = 9999.99
         t0 = time.time()
+        validated = False
 
         win = vis.line([0], [-1], opts=dict(title="Losses", xlabel="Step", ylabel="Loss"))
 
         for epoch in range(num_epochs):
+            step = 0
+            num_steps_in_epoch = int(np.ceil(len(image_datasets["train"]) / dataloaders["train"].batch_size))
             t0_epoch = time.time()
             print("--------------------")
             print("Epoch {}/{}".format(epoch+1, num_epochs))
 
-            for phase in ["train", "val"]:
-                if phase == "train":
-                    #exp_lr_scheduler.step()
-                    model.train()
-                else:
-                    model.eval()
+            ###################################################################
+            # training
+            ###################################################################
+            exp_lr_scheduler.step()
+            model.train()
 
-                running_loss = 0.0
+            # iterate over data
+            for data in dataloaders["train"]:
+                im_d, im_d_c, im_ud, k, dx, dy = data
+                im_d, im_d_c, im_ud = im_d.to(device), im_d_c.to(device), im_ud.to(device)
+                k, dx, dy = k.to(device), dx.to(device), dy.to(device)
 
-                # iterate over data
-                for step, data in enumerate(dataloaders[phase]):
-                    im_d, im_d_c, im_ud, k, dx, dy = data
-                    print("k_desired: ", k)
+                optimizer.zero_grad()
 
-                    # move to GPU
-                    im_d = im_d.to(device)  # [B, 3, 512, 512]
-                    im_d_c = im_d_c.to(device)
-                    im_ud = im_ud.to(device)
-                    k = k.to(device)  # [B]
-                    dx = dx.to(device)
-                    dy = dy.to(device)
+                # forward pass
+                with torch.enable_grad():
+                    im_ud_pred = model(im_d)
+                    #cv2.imshow("im_d", _convert_to_opencv(im_d[0, :, :, :].detach().cpu()))
+                    #cv2.imshow("im_ud", _convert_to_opencv(im_ud[0, :, :, :].detach().cpu()))
+                    #cv2.waitKey(1)
+                    loss = loss_criterion(im_ud_pred, im_ud)
+                    # backprop
+                    loss.backward()
+                    optimizer.step()
 
-                    optimizer.zero_grad()
+                # evaluate model every "evaluate_model_every_steps" steps
+                if step > 0 and step % evaluate_model_every_steps == 0:
+                    print("Running model evaluation...")
+                    val_loss = evaluate_model(dataloaders["val"], len(image_datasets["val"]))
+                    validated = True
 
-                    # forward pass
-                    with torch.set_grad_enabled(phase == "train"):
-                        im_ud_pred = model(im_d)
+                # report every "print_log_every_steps" steps
+                if step % print_log_every_steps == 0:
+                    if validated:
+                        validated = False
+                        disp = [epoch+1, num_epochs, step+1, num_steps_in_epoch, time.time() - t0_epoch, loss.item(), val_loss]
+                        print("epoch: {:02d}/{:02d}, step: {:06d}/{:06d}, elapsed: {:011.3f} s, train loss: {:.3f}, val loss: {:.3f}".format(*disp))
+                        vis.line([val_loss], [num_steps_in_epoch * epoch + step], win=win, name='val', update='append')
+                    else:
+                        disp = [epoch+1, num_epochs, step+1, num_steps_in_epoch, time.time() - t0_epoch, loss.item()]
+                        print("epoch: {:02d}/{:02d}, step: {:06d}/{:06d}, elapsed: {:011.3f} s, train loss: {:.3f}, val loss: ---".format(*disp))
+                        vis.line([loss.item()], [num_steps_in_epoch * epoch + step], win=win, name='train', update='append')
 
-                        #cv2.imshow("im_d", _convert_to_opencv(im_d[0, :, :, :].detach().cpu()))
-                        #cv2.imshow("im_ud", _convert_to_opencv(im_ud[0, :, :, :].detach().cpu()))
-                        #cv2.waitKey(1)
+                # save checkpoint every "save_model_ckpt_every_steps" steps
+                if step > 0 and step % save_model_ckpt_every_steps == 0:
+                    checkpoint = {
+                        "epoch": epoch,
+                        "step": step,
+                        'model_state_dict': model.state_dict(),
+                        'optimizer_state_dict': optimizer.state_dict(),
+                        'train_loss': loss
+                    }
+                    torch.save(checkpoint, "model/checkpoints/checkpoint_epoch_{}_step_{}.tar".format(epoch, step))
+                    print("Saved checkpoint.")
 
-                        loss = loss_criterion(im_ud_pred, im_ud)
+                step += 1
 
-                        # backprop when in training phase
-                        if phase == "train":
-                            loss.backward()
-                            optimizer.step()
+            ###################################################################
+            # testing
+            ###################################################################
 
-                    # stats
-                    running_loss += loss.item() * im_d_c.size(0)
 
-                    # report every 10 steps
-                    if step % 10 == 0:
-                        print("step: {}, loss: {}".format(step, loss.item()))
-                        vis.line([loss.item()], [step], win=win, update='append')
 
-                epoch_loss = running_loss / dataset_sizes[phase]
-
-                t_elapsed_epoch = time.time() - t0_epoch
-
-                print("{} Loss: {:.4f}, took {:.1f} s".format(phase, epoch_loss, t_elapsed_epoch))
-
-                # create and safe checkpoint
-                checkpoint = {
-                    "epoch": epoch,
-                    'model_state_dict': model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'loss': loss
-                }
-                torch.save(checkpoint, "model/checkpoints/checkpoint_epoch_{}.tar".format(epoch))
-                print("Saved checkpoint.")
-
-                # safe separate checkpoint if model is better than in previous epoch
-                if phase == "val" and epoch_loss < lowest_loss:
-                    lowest_loss = epoch_loss
-                    torch.save(checkpoint, "model/checkpoints/best_model.tar")
-                    print("Saved model in epoch {} as new best model.".format(epoch))
-
-        time_elapsed = time.time() - t0
-        print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
-        print('Lowest validation loss: {:4f}'.format(lowest_loss))
-
-        # load the best model
-        model.load_state_dict(best_model_weights)
+        #
+        #         # safe separate checkpoint if model is better than in previous epoch
+        #         if phase == "val" and epoch_loss < lowest_loss:
+        #             lowest_loss = epoch_loss
+        #             torch.save(checkpoint, "model/checkpoints/best_model.tar")
+        #             print("Saved model in epoch {} as new best model.".format(epoch))
+        #
+        # time_elapsed = time.time() - t0
+        # print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
+        # print('Lowest validation loss: {:4f}'.format(lowest_loss))
+        #
+        # # load the best model
+        # model.load_state_dict(best_model_weights)

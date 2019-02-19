@@ -35,15 +35,17 @@ class UndistortLayer(nn.Module):
             im_ud (torch.Tensor): Batch of undistorted output images with shape [B X C X H X W]
             and dtype torch.uint8.
         """
-        im_ud = torch.zeros(im_d.shape, dtype=im_d.dtype)
+        device = im_d.device
+        k, dx, dy = k.to(device), dx.to(device), dy.to(device)
+        im_ud = torch.zeros(im_d.shape, dtype=im_d.dtype, device=device)
         # compute xd, yd for each xu, yu and each channel as well as element in the batch
         b, c, h, w = im_d.shape
-        bv, cv, yu, xu = torch.meshgrid(torch.arange(0, b, dtype=torch.long),
-                                        torch.arange(0, c, dtype=torch.long),
-                                        torch.arange(0, h, dtype=torch.long),
-                                        torch.arange(0, w, dtype=torch.long))
-        xu = xu.type(torch.float)
-        yu = yu.type(torch.float)
+        bv, cv, yu, xu = torch.meshgrid(torch.arange(0, b).long().to(device),
+                                        torch.arange(0, c).long().to(device),
+                                        torch.arange(0, h).long().to(device),
+                                        torch.arange(0, w).long().to(device))
+        xu = xu.float()
+        yu = yu.float()
 
         # bring parameter tensors in shape [b, c, h, w]
         k = k.squeeze().expand([c, h, w, -1]).permute(3, 0, 1, 2)
@@ -73,10 +75,10 @@ class UndistortLayer(nn.Module):
         omega_ny = 1 - omega_y
 
         # convert to int so can be used for indexing
-        xd_floor = torch.floor(xd).type(torch.int64)
-        xd_ceil = torch.ceil(xd).type(torch.int64)
-        yd_floor = torch.floor(yd).type(torch.int64)
-        yd_ceil = torch.ceil(yd).type(torch.int64)
+        xd_floor = torch.floor(xd).long()
+        xd_ceil = torch.ceil(xd).long()
+        yd_floor = torch.floor(yd).long()
+        yd_ceil = torch.ceil(yd).long()
 
         # get intensity values from distorted image
         im_d_0 = im_d[bv, cv, yd_floor, xd_floor]
@@ -85,14 +87,14 @@ class UndistortLayer(nn.Module):
         im_d_3 = im_d[bv, cv, yd_ceil, xd_ceil]
 
         # compute new intensity values for output image
-        xu_idx = xu.type(torch.int64)
-        yu_idx = yu.type(torch.int64)
+        xu_idx = xu.long()
+        yu_idx = yu.long()
         im_ud[bv, cv, yu_idx, xu_idx] = (omega_nx*omega_ny*im_d_0 +
                                  omega_x*omega_ny*im_d_1 +
                                  omega_nx*omega_y*im_d_2 +
                                  omega_x*omega_y*im_d_3)
 
-        return im_ud#im_ud.type(torch.uint8)
+        return im_ud
 
 
 if __name__ == "__main__":
